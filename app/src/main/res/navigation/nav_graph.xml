@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/welcomeFragment">
+
+
+    <!-- Welcome Screen Fragment -->
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.example.reviewr.ui.WelcomeFragment"
+        android:label="WelcomeFragment"
+        tools:layout="@layout/welcome_fragment">
+        <action
+            android:id="@+id/action_welcomeFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        <action
+            android:id="@+id/action_welcomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <!-- Register Fragment -->
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.example.reviewr.ui.RegisterFragment"
+        android:label="RegisterFragment"
+        tools:layout="@layout/register_fragment">
+        <action
+            android:id="@+id/action_registerFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment" />
+    </fragment>
+
+    <!-- Login Fragment -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.example.reviewr.ui.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/login_fragment">
+        <action
+            android:id="@+id/action_loginFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
+    </fragment>
+
+    <!-- MainUserScreen Fragment -->
+    <fragment
+        android:id="@+id/mainUserFragment"
+        android:name="com.example.reviewr.ui.MainUserFragment"
+        android:label="MainUserFragment"
+        tools:layout="@layout/main_user_fragment">
+        <action
+            android:id="@+id/action_mainUserFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment" />
+        <action
+            android:id="@+id/action_mainUserFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
+    </fragment>
+
+    <!-- Map Fragment -->
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.reviewr.ui.MapFragment"
+        android:label="MapFragment"
+        tools:layout="@layout/map_fragment">
+    </fragment>
+
+
+
+</navigation>

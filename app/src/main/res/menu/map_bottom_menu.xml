@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/filterButton"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="Filter" />
+    <item
+        android:id="@+id/goBackButton"
+        android:icon="@drawable/ic_launcher_background"
+        android:title="Go Back" />
+</menu>
