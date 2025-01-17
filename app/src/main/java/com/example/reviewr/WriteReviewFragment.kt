@@ -6,15 +6,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.reviewr.R
+import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.WriteReviewFragmentBinding
-import org.osmdroid.util.GeoPoint
+import com.google.firebase.auth.FirebaseAuth
 
 class WriteReviewFragment : Fragment() {
 
     private var _binding: WriteReviewFragmentBinding? = null
     private val binding get() = _binding!!
+    private lateinit var reviewViewModel: ReviewViewModel
+
     private var latitude: Float = 0f
     private var longitude: Float = 0f
 
@@ -37,10 +41,20 @@ class WriteReviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize ViewModel
+        reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
+
+        // Observe the LiveData for review posting status
+        reviewViewModel.postReviewStatus.observe(viewLifecycleOwner) { result ->
+            handlePostReviewResult(result)
+        }
+
+        // Post review button
         binding.postReviewButton.setOnClickListener {
             postReview()
         }
 
+        // Go back button
         binding.goBackButton.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -56,16 +70,48 @@ class WriteReviewFragment : Fragment() {
         val category = binding.reviewCategory.selectedItem.toString()
         val description = binding.reviewDescription.text.toString()
 
-        // Example logic
-        val reviewPoint = GeoPoint(latitude.toDouble(), longitude.toDouble())
-        val markerColor = if (status == "Good") "Green" else "Red"
+        if (title.isEmpty() || description.isEmpty()) {
+            Toast.makeText(requireContext(), "Title and description are required.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Emit a Toast (replace with your logic to save the review)
-        Toast.makeText(requireContext(), "Review posted at ($latitude, $longitude)", Toast.LENGTH_SHORT).show()
+        // Create a review object
+        val review: Map<String, Any> = mapOf(
+            "userId" to FirebaseAuth.getInstance().currentUser?.uid.orEmpty(),
+            "location" to mapOf(
+                "latitude" to latitude.toDouble(),
+                "longitude" to longitude.toDouble()
+            ),
+            "title" to title,
+            "status" to status,
+            "category" to category,
+            "description" to description,
+            "timestamp" to com.google.firebase.Timestamp.now()
+        )
 
-        // Navigate back to the MapFragment
-        findNavController().navigateUp()
+        // Post review using ViewModel
+        reviewViewModel.postReview(review)
     }
+
+
+
+    private fun handlePostReviewResult(result: Boolean?) {
+        when (result) {
+            true -> {
+                Toast.makeText(requireContext(), "Review posted successfully!", Toast.LENGTH_SHORT).show()
+                findNavController().navigateUp()
+                reviewViewModel.resetPostReviewStatus()
+            }
+            false -> {
+                Toast.makeText(requireContext(), "Failed to post review. Please try again.", Toast.LENGTH_SHORT).show()
+                reviewViewModel.resetPostReviewStatus()
+            }
+            null -> {
+                // Do nothing, this is the initial state
+            }
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -68,7 +68,15 @@
         <action
             android:id="@+id/action_mapFragment_to_writeReviewFragment"
             app:destination="@id/writeReviewFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_viewReviewFragment"
+            app:destination="@id/viewReviewFragment">
+            <argument
+                android:name="postId"
+                app:argType="string" />
+        </action>
     </fragment>
+
     <!-- Write A Review Fragment -->
     <fragment
         android:id="@+id/writeReviewFragment"
@@ -81,8 +89,20 @@
         <argument
             android:name="longitude"
             app:argType="float" />
-
     </fragment>
+
+    <!-- View Review Fragment -->
+    <fragment
+        android:id="@+id/viewReviewFragment"
+        android:name="com.example.reviewr.ViewReviewFragment"
+        android:label="View Review"
+        tools:layout="@layout/view_review_fragment">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+
+
 
 
 
