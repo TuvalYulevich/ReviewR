@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("androidx.navigation.safeargs.kotlin")
 }
 
 android {
@@ -45,6 +46,9 @@ dependencies {
     implementation ("androidx.navigation:navigation-ui-ktx:2.8.5")
     // OSM Maps
     implementation ("org.osmdroid:osmdroid-android:6.1.13")
+    // Location allowance
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
+
 
 
     implementation(libs.androidx.core.ktx)

@@ -65,6 +65,23 @@
         android:name="com.example.reviewr.ui.MapFragment"
         android:label="MapFragment"
         tools:layout="@layout/map_fragment">
+        <action
+            android:id="@+id/action_mapFragment_to_writeReviewFragment"
+            app:destination="@id/writeReviewFragment" />
+    </fragment>
+    <!-- Write A Review Fragment -->
+    <fragment
+        android:id="@+id/writeReviewFragment"
+        android:name="com.example.reviewr.ui.WriteReviewFragment"
+        android:label="Write A Review"
+        tools:layout="@layout/write_review_fragment">
+        <argument
+            android:name="latitude"
+            app:argType="float" />
+        <argument
+            android:name="longitude"
+            app:argType="float" />
+
     </fragment>
 
 
