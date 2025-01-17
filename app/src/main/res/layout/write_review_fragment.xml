@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/reviewTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Review Title" />
+
+        <RadioGroup
+            android:id="@+id/reviewStatusGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+            <RadioButton
+                android:id="@+id/statusGood"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Good" />
+            <RadioButton
+                android:id="@+id/statusBad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bad" />
+        </RadioGroup>
+
+        <Spinner
+            android:id="@+id/reviewCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:entries="@array/review_categories" />
+
+        <EditText
+            android:id="@+id/reviewDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Review Description"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/uploadImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Upload Image"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/postReviewButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Post Review"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/goBackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Go Back"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+</ScrollView>
