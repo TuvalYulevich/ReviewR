@@ -4,15 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.reviewr.R
+import com.example.reviewr.ViewModel.UserViewModel
 import com.example.reviewr.databinding.LoginFragmentBinding
 
 class LoginFragment : Fragment() {
 
     private var _binding: LoginFragmentBinding? = null
     private val binding get() = _binding!!
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -25,15 +29,41 @@ class LoginFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Navigate to Main User Screen
+        // Initialize ViewModel
+        userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
+
+        // Observe login state (optional for future enhancements)
+        // You can add LiveData in UserViewModel to observe login status
+
+        // Login Button Click
         binding.loginButton.setOnClickListener {
-            // Placeholder for login validation
-            findNavController().navigate(R.id.action_loginFragment_to_mainUserFragment)
+            val email = binding.emailInput.text.toString().trim()
+            val password = binding.passwordInput.text.toString().trim()
+            loginUser(email, password)
         }
 
-        // Navigate back to Welcome Screen
+        // Go Back Button Click
         binding.goBackButton.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_welcomeFragment)
+        }
+    }
+
+    private fun loginUser(email: String, password: String) {
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(requireContext(), "Email and password are required.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        userViewModel.login(email, password).observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is UserViewModel.LoginResult.Success -> {
+                    Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(R.id.action_loginFragment_to_mainUserFragment)
+                }
+                is UserViewModel.LoginResult.Failure -> {
+                    Toast.makeText(requireContext(), "Login failed: ${result.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
