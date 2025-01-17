@@ -1,10 +1,12 @@
 package com.example.reviewr.ViewModel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class ReviewViewModel : ViewModel() {
 
@@ -21,6 +23,11 @@ class ReviewViewModel : ViewModel() {
     // LiveData to hold the selected review details
     private val _selectedReview = MutableLiveData<Map<String, Any>?>()
     val selectedReview: LiveData<Map<String, Any>?> get() = _selectedReview
+
+    // LiveData to hold the list of comments
+    private val _comments = MutableLiveData<List<Map<String, Any>>>()
+    val comments: LiveData<List<Map<String, Any>>> get() = _comments
+
 
 
     // Fetch reviews from Firestore
@@ -74,4 +81,50 @@ class ReviewViewModel : ViewModel() {
 
     // Get the currently logged-in user
     fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
+
+    // Function to fetch comments for a specific review
+    fun fetchComments(postId: String) {
+        firestore.collection("comments")
+            .whereEqualTo("postId", postId)
+            .addSnapshotListener { snapshots, exception ->
+                if (exception != null) {
+                    Log.e("ReviewViewModel", "Failed to listen for comments: $exception")
+                    _comments.value = emptyList()
+                    return@addSnapshotListener
+                }
+
+                val fetchedComments = snapshots?.map { it.data } ?: emptyList()
+                _comments.value = fetchedComments
+                Log.d("ReviewViewModel", "Real-time comments fetched: $fetchedComments")
+            }
+    }
+
+    // Function to post a new comment
+    fun postComment(postId: String, comment: Map<String, Any>, callback: (Boolean) -> Unit) {
+        firestore.collection("comments")
+            .add(comment)
+            .addOnSuccessListener {
+                Log.d("ReviewViewModel", "Comment added with ID: ${it.id}")
+                fetchComments(postId) // Fetch comments again after posting
+                callback(true)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ReviewViewModel", "Failed to add comment: $exception")
+                callback(false)
+            }
+    }
+
+    fun fetchReviewAuthor(userId: String, callback: (String) -> Unit) {
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        userDocRef.get()
+            .addOnSuccessListener { document ->
+                val username = document.getString("username") ?: "Anonymous"
+                callback(username)
+            }
+            .addOnFailureListener {
+                callback("Unknown")
+            }
+    }
+
+
 }

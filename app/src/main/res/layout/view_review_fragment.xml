@@ -1,44 +1,77 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <LinearLayout
+    <!-- Review Details -->
+    <TextView
+        android:id="@+id/reviewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/reviewDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/reviewStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/reviewCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/reviewAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:layout_marginTop="8dp" />
+    <TextView
+        android:id="@+id/reviewTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="#888888"
+        android:layout_marginTop="4dp" />
+
+    <!-- Comment Section -->
+    <TextView
+        android:id="@+id/noCommentsText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="There are no comments on this review yet!"
+        android:visibility="gone"
+        android:gravity="center"
+        android:padding="16dp" />
 
-        <TextView
-            android:id="@+id/reviewTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:paddingBottom="8dp" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/commentsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/reviewDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp" />
+    <!-- Comment Button -->
+    <Button
+        android:id="@+id/commentButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Comment"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center" />
 
-        <TextView
-            android:id="@+id/reviewStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp" />
-
-        <TextView
-            android:id="@+id/reviewCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingBottom="8dp" />
-        <!-- Add the Go Back Button -->
-        <Button
-            android:id="@+id/goBackButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Go Back" />
-    </LinearLayout>
-</ScrollView>
+    <!-- Back Button -->
+    <Button
+        android:id="@+id/goBackButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go Back"
+        android:layout_gravity="center" />
+</LinearLayout>
