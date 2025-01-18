@@ -123,12 +123,10 @@
         <action
             android:id="@+id/action_viewUserInformationFragment_to_editMyReviewsFragment"
             app:destination="@id/editMyReviewsFragment" />
-        <!--
+
         <action
             android:id="@+id/action_viewUserInformationFragment_to_editMyCommentsFragment"
             app:destination="@id/editMyCommentsFragment" />
-            -->
-
     </fragment>
 
     <!-- View User Data Fragment -->
@@ -164,6 +162,28 @@
         tools:layout="@layout/edit_review_fragment">
         <argument
             android:name="postId"
+            app:argType="string" />
+    </fragment>
+
+    <!-- Edit My Comments  Fragment -->
+    <fragment
+        android:id="@+id/editMyCommentsFragment"
+        android:name="com.example.reviewr.ui.EditMyCommentsFragment"
+        android:label="Edit My Comments"
+        tools:layout="@layout/edit_my_comments_fragment">
+        <action
+            android:id="@+id/action_editMyCommentsFragment_to_editCommentFragment"
+            app:destination="@id/editCommentFragment" />
+    </fragment>
+
+    <!-- Edit A Comment  Fragment -->
+    <fragment
+        android:id="@+id/editCommentFragment"
+        android:name="com.example.reviewr.ui.EditCommentFragment"
+        android:label="Edit Comment"
+        tools:layout="@layout/edit_comment_fragment">
+        <argument
+            android:name="commentId"
             app:argType="string" />
     </fragment>
 

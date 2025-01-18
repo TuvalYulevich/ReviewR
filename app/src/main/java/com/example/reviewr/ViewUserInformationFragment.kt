@@ -38,9 +38,9 @@ class ViewUserInformationFragment : Fragment() {
              findNavController().navigate(R.id.action_viewUserInformationFragment_to_editMyReviewsFragment)
         }
 
-        //binding.editMyCommentsButton.setOnClickListener {
-            //findNavController().navigate(R.id.action_viewUserInformationFragment_to_editMyCommentsFragment)
-        //}
+        binding.editMyCommentsButton.setOnClickListener {
+            findNavController().navigate(R.id.action_viewUserInformationFragment_to_editMyCommentsFragment)
+        }
 
         binding.goBackButton.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
