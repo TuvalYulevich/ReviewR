@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.reviewr.FilterDialogFragment
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.MapFragmentBinding
@@ -144,13 +145,28 @@ class MapFragment : Fragment() {
     }
 
 
-
-
-
     private fun handleBottomNavigation(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.filterButton -> {
-                // Placeholder for filter functionality
+                val dialog = FilterDialogFragment { action, filters ->
+                    when (action) {
+                        "applyFilters" -> {
+                            filters?.let { reviewViewModel.applyFilters(it) { filteredReviews ->
+                                updateMapMarkers(filteredReviews)
+                            } }
+                        }
+                        "showAll" -> {
+                            reviewViewModel.fetchReviews() // Fetch all reviews
+                            reviewViewModel.reviews.observe(viewLifecycleOwner) { allReviews ->
+                                updateMapMarkers(allReviews) // Update the map with all reviews
+                            }
+                        }
+                        "hideAll" -> {
+                            updateMapMarkers(emptyList()) // Clear all markers
+                        }
+                    }
+                }
+                dialog.show(parentFragmentManager, "FilterDialog")
                 true
             }
             R.id.goBackButton -> {
@@ -160,6 +176,48 @@ class MapFragment : Fragment() {
             else -> false
         }
     }
+
+
+
+
+    private fun updateMapMarkers(reviews: List<Map<String, Any>>) {
+        // Remove only review markers but keep the user's location marker
+        mapView.overlays.removeAll { overlay ->
+            overlay is Marker && overlay.title != "You are here" // Keep user location marker
+        }
+
+        // Add markers for reviews
+        for (review in reviews) {
+            val location = review["location"] as? Map<String, Double> ?: continue
+            val latitude = location["latitude"] ?: continue
+            val longitude = location["longitude"] ?: continue
+            val title = review["title"] as? String ?: "No Title"
+            val status = review["status"] as? String ?: "Unknown"
+
+            val markerIcon = when (status) {
+                "Good" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_green_marker)
+                "Bad" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_red_marker)
+                else -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_marker)
+            }
+
+            val marker = Marker(mapView).apply {
+                position = GeoPoint(latitude, longitude)
+                this.title = title
+                icon = markerIcon
+                setOnMarkerClickListener { _, _ ->
+                    showReviewDialog(review["postId"] as String) // Trigger review dialog
+                    true // Consume the click event
+                }
+            }
+
+            mapView.overlays.add(marker)
+        }
+
+        mapView.invalidate() // Refresh the map
+    }
+
+
+
 
     private fun setupLongPressListener() {
         mapView.setOnTouchListener { _, motionEvent ->
@@ -310,6 +368,8 @@ class MapFragment : Fragment() {
 
         showUserLocation()
     }
+
+
 
 
     override fun onPause() {
