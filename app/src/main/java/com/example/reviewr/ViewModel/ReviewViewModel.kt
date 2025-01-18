@@ -181,5 +181,31 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    fun applyFilters(filters: Map<String, String>, callback: (List<Map<String, Any>>) -> Unit) {
+        var query: Query = firestore.collection("posts")
+
+        filters["status"]?.let { status ->
+            if (status != "All") {
+                query = query.whereEqualTo("status", status)
+            }
+        }
+
+        filters["category"]?.let { category ->
+            if (category != "All") {
+                query = query.whereEqualTo("category", category)
+            }
+        }
+
+        query.get().addOnSuccessListener { snapshot ->
+            val filteredReviews = snapshot.documents.mapNotNull { it.data }
+            callback(filteredReviews)
+        }.addOnFailureListener { exception ->
+            Log.e("ReviewViewModel", "Error applying filters: $exception")
+            callback(emptyList()) // Return an empty list on failure
+        }
+    }
+
+
+
 
 }

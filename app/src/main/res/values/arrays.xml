@@ -1,0 +1,24 @@
+<resources>
+    <string-array name="status_options">
+        <!-- <item>Show All</item> -->
+        <!-- <item>Show None</item> -->
+        <item>Good</item>
+        <item>Bad</item>
+    </string-array>
+
+    <string-array name="category_options">
+        <item>All</item>
+        <item>Shopping</item>
+        <item>Food</item>
+        <item>Sports</item>
+        <item>Sightseeing</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="filter_mode_options">
+        <item>Show All</item>
+        <item>Show None</item>
+        <item>Custom</item>
+    </string-array>
+
+</resources>
