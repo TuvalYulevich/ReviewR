@@ -11,6 +11,8 @@ import com.example.reviewr.databinding.MainUserFragmentBinding
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.example.reviewr.SearchDialogFragment
+import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.ViewModel.UserViewModel
 
 class MainUserFragment : Fragment() {
@@ -18,6 +20,8 @@ class MainUserFragment : Fragment() {
     private var _binding: MainUserFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var userViewModel: UserViewModel
+    private lateinit var reviewViewModel: ReviewViewModel
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,9 +52,35 @@ class MainUserFragment : Fragment() {
             findNavController().navigate(R.id.action_mainUserFragment_to_mapFragment)
         }
 
+        // Initialize ViewModel
+        reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
+
+// Set up the search button click listener
         binding.searchReviewsButton.setOnClickListener {
-            // Navigate to Search Reviews Screen
+            val dialog = SearchDialogFragment { filters ->
+                when (filters["action"]) {
+                    "showAll" -> {
+                        // Fetch all reviews and navigate to SearchResultsFragment
+                        reviewViewModel.fetchAllReviews() // Use a method specifically for fetching all reviews
+                        findNavController().navigate(
+                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                        )
+                    }
+                    "applyFilters" -> {
+                        // Apply filters and navigate to SearchResultsFragment
+                        reviewViewModel.applyFilters2(filters)
+                        findNavController().navigate(
+                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                        )
+                    }
+                }
+            }
+            dialog.show(parentFragmentManager, "SearchDialog")
         }
+
+
+
+
 
         binding.viewMyInfoButton.setOnClickListener {
             findNavController().navigate(R.id.action_mainUserFragment_to_viewUserInformationFragment)
