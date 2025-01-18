@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reviewr.R
+import com.example.reviewr.ViewModel.CommentViewModel
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.adapters.ReviewAdapter
 import com.example.reviewr.databinding.EditMyReviewsFragmentBinding
@@ -46,23 +47,39 @@ class EditMyReviewsFragment : Fragment() {
                 binding.noReviewsText.visibility = View.GONE
                 binding.reviewsRecyclerView.visibility = View.VISIBLE
 
-                val adapter = ReviewAdapter(reviews,
+                val adapter = ReviewAdapter(
+                    reviews = reviews,
                     onEditClicked = { review ->
-                        // Navigate to an edit screen (or show dialog for editing)
                         val postId = review["postId"] as? String ?: return@ReviewAdapter
                         val action = EditMyReviewsFragmentDirections.actionEditMyReviewsFragmentToEditReviewFragment(postId)
                         findNavController().navigate(action)
                     },
                     onDeleteClicked = { postId ->
-                        // Delete the review
-                        reviewViewModel.deleteReview(postId) { success ->
-                            if (success) {
-                                Toast.makeText(requireContext(), "Review deleted successfully.", Toast.LENGTH_SHORT).show()
-                                reviewViewModel.fetchUserReviews(userId) { updatedReviews ->
-                                    binding.reviewsRecyclerView.adapter = ReviewAdapter(updatedReviews, onEditClicked = {}, onDeleteClicked = {})
+                        // Delete comments first using CommentViewModel
+                        val commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
+                        commentViewModel.deleteCommentsByPostId(postId) { commentDeleteSuccess ->
+                            if (commentDeleteSuccess) {
+                                // Now delete the review
+                                reviewViewModel.deleteReview(postId) { reviewDeleteSuccess ->
+                                    if (reviewDeleteSuccess) {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Review and associated comments deleted successfully.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        reviewViewModel.fetchUserReviews(userId) { updatedReviews ->
+                                            binding.reviewsRecyclerView.adapter = ReviewAdapter(
+                                                updatedReviews,
+                                                onEditClicked = { review -> /* Same edit logic */ },
+                                                onDeleteClicked = { postId -> /* Same delete logic */ }
+                                            )
+                                        }
+                                    } else {
+                                        Toast.makeText(requireContext(), "Failed to delete review.", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             } else {
-                                Toast.makeText(requireContext(), "Failed to delete review.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(requireContext(), "Failed to delete comments for the review.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
