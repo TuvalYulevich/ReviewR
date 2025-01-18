@@ -1,5 +1,6 @@
 package com.example.reviewr.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -32,14 +33,26 @@ class LoginFragment : Fragment() {
         // Initialize ViewModel
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        // Observe login state (optional for future enhancements)
-        // You can add LiveData in UserViewModel to observe login status
+        // Check if user is already remembered
+        val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        val savedEmail = sharedPreferences.getString("email", null)
+        val savedPassword = sharedPreferences.getString("password", null)
+
+        if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
+            loginUser(savedEmail, savedPassword, rememberMe = true, skipToast = true)
+        }
 
         // Login Button Click
         binding.loginButton.setOnClickListener {
             val email = binding.emailInput.text.toString().trim()
             val password = binding.passwordInput.text.toString().trim()
-            loginUser(email, password)
+            val rememberMe = binding.rememberMeCheckbox.isChecked
+
+            if (email.isNotEmpty() && password.isNotEmpty()) {
+                loginUser(email, password, rememberMe)
+            } else {
+                Toast.makeText(requireContext(), "Email and password are required.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Go Back Button Click
@@ -48,23 +61,36 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun loginUser(email: String, password: String) {
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(requireContext(), "Email and password are required.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
+    private fun loginUser(email: String, password: String, rememberMe: Boolean = false, skipToast: Boolean = false) {
         userViewModel.login(email, password).observe(viewLifecycleOwner) { result ->
             when (result) {
                 is UserViewModel.LoginResult.Success -> {
-                    Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
-                    findNavController().navigate(R.id.action_loginFragment_to_mainUserFragment)
+                    if (rememberMe) {
+                        saveUserCredentials(email, password)
+                    }
+                    navigateToMainScreen()
+                    if (!skipToast) {
+                        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                    }
                 }
                 is UserViewModel.LoginResult.Failure -> {
                     Toast.makeText(requireContext(), "Login failed: ${result.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+    }
+
+    private fun saveUserCredentials(email: String, password: String) {
+        val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putString("email", email)
+            putString("password", password)
+            apply()
+        }
+    }
+
+    private fun navigateToMainScreen() {
+        findNavController().navigate(R.id.action_loginFragment_to_mainUserFragment)
     }
 
     override fun onDestroyView() {
