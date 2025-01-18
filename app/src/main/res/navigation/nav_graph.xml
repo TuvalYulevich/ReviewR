@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/welcomeFragment">
+    app:startDestination="@id/entryFragment">
 
 
     <!-- Welcome Screen Fragment -->
@@ -203,6 +203,20 @@
                 android:name="postId"
                 app:argType="string" />
         </action>
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/entryFragment"
+        android:name="com.example.reviewr.ui.EntryFragment"
+        android:label="EntryFragment"
+        tools:layout="@layout/entry_fragment">
+        <action
+            android:id="@+id/action_entryFragment_to_mainUserFragment"
+            app:destination="@id/mainUserFragment" />
+        <action
+            android:id="@+id/action_entryFragment_to_welcomeFragment"
+            app:destination="@id/welcomeFragment" />
     </fragment>
 
 </navigation>

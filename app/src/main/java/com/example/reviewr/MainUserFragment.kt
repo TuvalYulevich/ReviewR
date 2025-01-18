@@ -1,5 +1,6 @@
 package com.example.reviewr.ui
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -86,14 +87,20 @@ class MainUserFragment : Fragment() {
             findNavController().navigate(R.id.action_mainUserFragment_to_viewUserInformationFragment)
         }
 
-        // Logout button
         binding.logoutButton.setOnClickListener {
             userViewModel.logout()
+            clearUserCredentials()
             Toast.makeText(requireContext(), "Logged out successfully.", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_mainUserFragment_to_welcomeFragment)
         }
+
+
     }
 
+    private fun clearUserCredentials() {
+        val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
+        sharedPreferences.edit().clear().apply()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
