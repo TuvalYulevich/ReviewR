@@ -55,6 +55,9 @@
             android:id="@+id/action_mainUserFragment_to_welcomeFragment"
             app:destination="@id/welcomeFragment" />
         <action
+            android:id="@+id/action_mainUserFragment_to_searchResultsFragment"
+            app:destination="@id/searchResultsFragment" />
+        <action
             android:id="@+id/action_mainUserFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
         <action
@@ -188,9 +191,18 @@
     </fragment>
 
 
-
-
-
-
+    <!-- Search Results Fragment -->
+    <fragment
+        android:id="@+id/searchResultsFragment"
+        android:name="com.example.reviewr.ui.SearchResultsFragment"
+        tools:layout="@layout/search_results_fragment">
+        <action
+            android:id="@+id/action_searchResultsFragment_to_viewReviewFragment"
+            app:destination="@id/viewReviewFragment">
+            <argument
+                android:name="postId"
+                app:argType="string" />
+        </action>
+    </fragment>
 
 </navigation>

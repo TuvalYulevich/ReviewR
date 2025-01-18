@@ -28,6 +28,28 @@ class ReviewViewModel : ViewModel() {
     private val _comments = MutableLiveData<List<Map<String, Any>>>()
     val comments: LiveData<List<Map<String, Any>>> get() = _comments
 
+    // Filtered Reviews from search button
+    private val _filteredReviews = MutableLiveData<List<Map<String, Any>>>()
+    val filteredReviews: LiveData<List<Map<String, Any>>> get() = _filteredReviews
+
+
+    fun setFilteredReviews(reviews: List<Map<String, Any>>) {
+        _filteredReviews.value = reviews
+    }
+
+    fun fetchAllReviews() {
+        firestore.collection("posts")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val allReviews = snapshot.documents.mapNotNull { it.data }
+                _filteredReviews.value = allReviews // Set all reviews to filteredReviews LiveData
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ReviewViewModel", "Failed to fetch all reviews: $exception")
+                _filteredReviews.value = emptyList()
+            }
+    }
+
 
 
     // Fetch reviews from Firestore
@@ -204,6 +226,28 @@ class ReviewViewModel : ViewModel() {
             callback(emptyList()) // Return an empty list on failure
         }
     }
+
+    fun applyFilters2(filters: Map<String, String>) {
+        var query: Query = firestore.collection("posts")
+
+        filters["status"]?.let { status ->
+            if (status != "All") query = query.whereEqualTo("status", status)
+        }
+        filters["category"]?.let { category ->
+            if (category != "All") query = query.whereEqualTo("category", category)
+        }
+
+        query.get()
+            .addOnSuccessListener { snapshot ->
+                val filteredResults = snapshot.documents.mapNotNull { it.data }
+                _filteredReviews.value = filteredResults // Set filtered reviews
+            }
+            .addOnFailureListener { exception ->
+                Log.e("ReviewViewModel", "Error applying filters: $exception")
+                _filteredReviews.value = emptyList()
+            }
+    }
+
 
 
 
