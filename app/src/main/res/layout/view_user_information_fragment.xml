@@ -1,0 +1,42 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:gravity="center">
+
+    <Button
+        android:id="@+id/viewUserDataButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View My User Data"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/editPersonalDetailsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit My Personal Details"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/editMyReviewsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit My Reviews"
+        android:layout_marginBottom="16dp" />
+
+    <Button
+        android:id="@+id/editMyCommentsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit My Comments" />
+
+    <Button
+        android:id="@+id/goBackButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Go Back"
+        android:layout_marginTop="32dp" />
+</LinearLayout>

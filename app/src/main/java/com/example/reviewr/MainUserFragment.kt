@@ -53,7 +53,7 @@ class MainUserFragment : Fragment() {
         }
 
         binding.viewMyInfoButton.setOnClickListener {
-            // Navigate to View My Information Screen
+            findNavController().navigate(R.id.action_mainUserFragment_to_viewUserInformationFragment)
         }
 
         // Logout button

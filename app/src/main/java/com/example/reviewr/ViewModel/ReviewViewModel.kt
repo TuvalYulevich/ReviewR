@@ -129,5 +129,54 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    fun fetchUserReviews(userId: String, callback: (List<Map<String, Any>>) -> Unit) {
+        firestore.collection("posts")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                val reviews = documents.mapNotNull { it.data }
+                callback(reviews)
+            }
+            .addOnFailureListener {
+                callback(emptyList())
+            }
+    }
+
+    fun deleteReview(postId: String, callback: (Boolean) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .delete()
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
+    fun fetchReview(postId: String, callback: (Map<String, Any>?) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                callback(document.data)
+            }
+            .addOnFailureListener {
+                callback(null)
+            }
+    }
+
+    fun updateReview(postId: String, updatedReview: Map<String, Any>, callback: (Boolean) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .update(updatedReview)
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
+
+
+
 
 }
