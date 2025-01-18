@@ -37,6 +37,7 @@ class MapFragment : Fragment() {
     private var longPressHandler: Handler? = null
     private var longPressRunnable: Runnable? = null
     private lateinit var reviewViewModel: ReviewViewModel
+    private val reviewMarkers = mutableMapOf<String, Marker>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -195,45 +196,70 @@ class MapFragment : Fragment() {
     private fun displayReviewsOnMap(reviews: List<Map<String, Any>>) {
         Log.d("MapFragment", "Displaying reviews on map. Existing overlays: ${mapView.overlays.size}")
 
+        // Step 1: Remove markers for reviews no longer present
+        val existingPostIds = reviews.mapNotNull { it["postId"] as? String }
+        val markersToRemove = reviewMarkers.keys.filterNot { it in existingPostIds }
+        for (postId in markersToRemove) {
+            reviewMarkers[postId]?.let { marker ->
+                mapView.overlays.remove(marker)
+            }
+            reviewMarkers.remove(postId)
+        }
+
+        // Step 2: Add or update markers for current reviews
         for (review in reviews) {
+            val postId = review["postId"] as? String ?: continue
             val location = review["location"] as? Map<String, Double> ?: continue
             val latitude = location["latitude"] ?: continue
             val longitude = location["longitude"] ?: continue
             val title = review["title"] as? String ?: "No Title"
             val status = review["status"] as? String ?: "Unknown"
-            val postId = review["postId"] as? String ?: continue
 
-            // Avoid duplicate markers for the same review
-            val existingMarker = mapView.overlays.find {
-                it is Marker && it.position.latitude == latitude && it.position.longitude == longitude
-            }
-            if (existingMarker != null) {
-                Log.d("MapFragment", "Review marker already exists: $title at $latitude, $longitude")
-                continue
+            val markerIcon = when (status) {
+                "Good" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_green_marker)
+                "Bad" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_red_marker)
+                else -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_marker)
             }
 
-            // Add a new marker
-            val marker = Marker(mapView).apply {
-                position = GeoPoint(latitude, longitude)
-                this.title = title
-                icon = when (status) {
-                    "Good" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_green_marker)
-                    "Bad" -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_red_marker)
-                    else -> ContextCompat.getDrawable(requireContext(), R.drawable.ic_default_marker)
+            // Check if the marker already exists for this postId
+            val existingMarker = reviewMarkers[postId]
+
+            if (existingMarker == null) {
+                // Add new marker
+                val marker = Marker(mapView).apply {
+                    position = GeoPoint(latitude, longitude)
+                    this.title = title
+                    icon = markerIcon
+                    setOnMarkerClickListener { _, _ ->
+                        showReviewDialog(postId) // Trigger review dialog
+                        true // Consume the click event
+                    }
                 }
-
-                // Add click listener for the review
-                setOnMarkerClickListener { _, _ ->
-                    showReviewDialog(postId) // Trigger review dialog
+                mapView.overlays.add(marker)
+                reviewMarkers[postId] = marker
+                Log.d("MapFragment", "Review marker added: $title at $latitude, $longitude")
+            } else {
+                // Update existing marker (if needed)
+                existingMarker.position = GeoPoint(latitude, longitude)
+                existingMarker.title = title
+                if (existingMarker.icon != markerIcon) {
+                    // Update marker icon only if it has changed
+                    existingMarker.icon = markerIcon
+                    Log.d("MapFragment", "Marker icon updated for review: $title")
+                }
+                // Refresh click listener for the updated marker
+                existingMarker.setOnMarkerClickListener { _, _ ->
+                    showReviewDialog(postId)
                     true // Consume the click event
                 }
+                Log.d("MapFragment", "Marker click listener updated for review: $title")
             }
-            mapView.overlays.add(marker)
-            Log.d("MapFragment", "Review marker added: $title at $latitude, $longitude")
         }
+
         Log.d("MapFragment", "Final overlays after adding reviews: ${mapView.overlays.size}")
         mapView.invalidate()
     }
+
 
 
     private fun showAddReviewDialog(location: GeoPoint) {
@@ -273,9 +299,18 @@ class MapFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         mapView.onResume()
-        reviewViewModel.fetchReviews() // Re-fetch reviews to ensure the latest data is displayed
+
+        // Ensure all markers are restored
+        reviewMarkers.values.forEach { marker ->
+            if (!mapView.overlays.contains(marker)) {
+                mapView.overlays.add(marker)
+            }
+        }
+        mapView.invalidate()
+
         showUserLocation()
     }
+
 
     override fun onPause() {
         super.onPause()

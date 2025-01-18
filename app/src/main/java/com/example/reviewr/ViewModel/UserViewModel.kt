@@ -22,7 +22,7 @@ class UserViewModel : ViewModel() {
         username: String,
         firstName: String,
         lastName: String,
-        age: String
+        age: String,
     ): LiveData<RegistrationResult> {
         val result = MutableLiveData<RegistrationResult>()
 
@@ -30,7 +30,7 @@ class UserViewModel : ViewModel() {
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val userId = auth.currentUser?.uid ?: return@addOnCompleteListener
-                    saveUserDetailsToFirestore(userId, username, firstName, lastName, email, age, result)
+                    saveUserDetailsToFirestore(userId, username, firstName, lastName, email, age, password, result)
                 } else {
                     result.value = RegistrationResult.Failure(task.exception?.message)
                 }
@@ -46,6 +46,7 @@ class UserViewModel : ViewModel() {
         lastName: String,
         email: String,
         age: String,
+        password: String,
         result: MutableLiveData<RegistrationResult>
     ) {
         val user = hashMapOf(
@@ -54,7 +55,8 @@ class UserViewModel : ViewModel() {
             "firstName" to firstName,
             "lastName" to lastName,
             "email" to email,
-            "age" to age
+            "age" to age,
+            "password" to password
         )
 
         firestore.collection("users").document(userId)

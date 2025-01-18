@@ -33,13 +33,16 @@ class ReviewViewModel : ViewModel() {
     // Fetch reviews from Firestore
     fun fetchReviews() {
         firestore.collection("posts")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val reviewList = querySnapshot.documents.mapNotNull { it.data }
+            .addSnapshotListener { snapshots, exception ->
+                if (exception != null) {
+                    Log.e("ReviewViewModel", "Failed to listen for reviews: $exception")
+                    _reviews.value = emptyList()
+                    return@addSnapshotListener
+                }
+
+                val reviewList = snapshots?.documents?.mapNotNull { it.data } ?: emptyList()
                 _reviews.value = reviewList
-            }
-            .addOnFailureListener {
-                _reviews.value = emptyList() // Set an empty list on failure
+                Log.d("ReviewViewModel", "Real-time reviews fetched: $reviewList")
             }
     }
 
