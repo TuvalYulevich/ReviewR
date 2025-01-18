@@ -146,12 +146,16 @@ class ReviewViewModel : ViewModel() {
         firestore.collection("posts").document(postId)
             .delete()
             .addOnSuccessListener {
+                Log.d("ReviewViewModel", "Review deleted successfully.")
                 callback(true)
             }
-            .addOnFailureListener {
+            .addOnFailureListener { exception ->
+                Log.e("ReviewViewModel", "Failed to delete review: $exception")
                 callback(false)
             }
     }
+
+
 
     fun fetchReview(postId: String, callback: (Map<String, Any>?) -> Unit) {
         firestore.collection("posts").document(postId)
@@ -159,10 +163,12 @@ class ReviewViewModel : ViewModel() {
             .addOnSuccessListener { document ->
                 callback(document.data)
             }
-            .addOnFailureListener {
+            .addOnFailureListener { exception ->
+                Log.e("ReviewViewModel", "Failed to fetch review: $exception")
                 callback(null)
             }
     }
+
 
     fun updateReview(postId: String, updatedReview: Map<String, Any>, callback: (Boolean) -> Unit) {
         firestore.collection("posts").document(postId)
@@ -174,7 +180,6 @@ class ReviewViewModel : ViewModel() {
                 callback(false)
             }
     }
-
 
 
 }
