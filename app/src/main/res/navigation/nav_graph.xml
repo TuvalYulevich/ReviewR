@@ -57,6 +57,10 @@
         <action
             android:id="@+id/action_mainUserFragment_to_mapFragment"
             app:destination="@id/mapFragment" />
+        <action
+            android:id="@+id/action_mainUserFragment_to_viewUserInformationFragment"
+            app:destination="@id/viewUserInformationFragment"
+            />
     </fragment>
 
     <!-- Map Fragment -->
@@ -101,6 +105,69 @@
             android:name="postId"
             app:argType="string" />
     </fragment>
+
+    <!-- View User Information Fragment -->
+    <fragment
+        android:id="@+id/viewUserInformationFragment"
+        android:name="com.example.reviewr.ui.ViewUserInformationFragment"
+        android:label="View Information"
+        tools:layout="@layout/view_user_information_fragment">
+        <action
+            android:id="@+id/action_viewUserInformationFragment_to_viewUserDataFragment"
+            app:destination="@id/viewUserDataFragment" />
+
+        <action
+            android:id="@+id/action_viewUserInformationFragment_to_editPersonalDetailsFragment"
+            app:destination="@id/editPersonalDetailsFragment" />
+
+        <action
+            android:id="@+id/action_viewUserInformationFragment_to_editMyReviewsFragment"
+            app:destination="@id/editMyReviewsFragment" />
+        <!--
+        <action
+            android:id="@+id/action_viewUserInformationFragment_to_editMyCommentsFragment"
+            app:destination="@id/editMyCommentsFragment" />
+            -->
+
+    </fragment>
+
+    <!-- View User Data Fragment -->
+    <fragment
+        android:id="@+id/viewUserDataFragment"
+        android:name="com.example.reviewr.ui.ViewUserDataFragment"
+        android:label="View User Data"
+        tools:layout="@layout/view_user_data_fragment"/>
+
+    <!-- Edit Peronal User Details Fragment -->
+    <fragment
+        android:id="@+id/editPersonalDetailsFragment"
+        android:name="com.example.reviewr.ui.EditPersonalDetailsFragment"
+        android:label="Edit Personal Details"
+        tools:layout="@layout/edit_personal_details_fragment" />
+
+    <!-- Edit My Reviews  Fragment -->
+    <fragment
+        android:id="@+id/editMyReviewsFragment"
+        android:name="com.example.reviewr.ui.EditMyReviewsFragment"
+        android:label="Edit My Reviews"
+        tools:layout="@layout/edit_my_reviews_fragment">
+        <action
+            android:id="@+id/action_editMyReviewsFragment_to_editReviewFragment"
+            app:destination="@id/editReviewFragment" />
+    </fragment>
+
+    <!-- Edit A Review  Fragment -->
+    <fragment
+        android:id="@+id/editReviewFragment"
+        android:name="com.example.reviewr.ui.EditReviewFragment"
+        android:label="Edit Review"
+        tools:layout="@layout/edit_review_fragment">
+        <argument
+            android:name="postId"
+            app:argType="string" />
+    </fragment>
+
+
 
 
 

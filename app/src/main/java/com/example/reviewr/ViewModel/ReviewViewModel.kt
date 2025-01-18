@@ -33,13 +33,16 @@ class ReviewViewModel : ViewModel() {
     // Fetch reviews from Firestore
     fun fetchReviews() {
         firestore.collection("posts")
-            .get()
-            .addOnSuccessListener { querySnapshot ->
-                val reviewList = querySnapshot.documents.mapNotNull { it.data }
+            .addSnapshotListener { snapshots, exception ->
+                if (exception != null) {
+                    Log.e("ReviewViewModel", "Failed to listen for reviews: $exception")
+                    _reviews.value = emptyList()
+                    return@addSnapshotListener
+                }
+
+                val reviewList = snapshots?.documents?.mapNotNull { it.data } ?: emptyList()
                 _reviews.value = reviewList
-            }
-            .addOnFailureListener {
-                _reviews.value = emptyList() // Set an empty list on failure
+                Log.d("ReviewViewModel", "Real-time reviews fetched: $reviewList")
             }
     }
 
@@ -125,6 +128,55 @@ class ReviewViewModel : ViewModel() {
                 callback("Unknown")
             }
     }
+
+    fun fetchUserReviews(userId: String, callback: (List<Map<String, Any>>) -> Unit) {
+        firestore.collection("posts")
+            .whereEqualTo("userId", userId)
+            .get()
+            .addOnSuccessListener { documents ->
+                val reviews = documents.mapNotNull { it.data }
+                callback(reviews)
+            }
+            .addOnFailureListener {
+                callback(emptyList())
+            }
+    }
+
+    fun deleteReview(postId: String, callback: (Boolean) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .delete()
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
+    fun fetchReview(postId: String, callback: (Map<String, Any>?) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                callback(document.data)
+            }
+            .addOnFailureListener {
+                callback(null)
+            }
+    }
+
+    fun updateReview(postId: String, updatedReview: Map<String, Any>, callback: (Boolean) -> Unit) {
+        firestore.collection("posts").document(postId)
+            .update(updatedReview)
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
+
+
 
 
 }

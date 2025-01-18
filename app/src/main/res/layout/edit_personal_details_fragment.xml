@@ -1,0 +1,127 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- User Details Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Personal Details"
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/usernameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Username" />
+
+        <EditText
+            android:id="@+id/firstNameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="First Name"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/lastNameInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Last Name"
+            android:layout_marginTop="16dp" />
+
+        <EditText
+            android:id="@+id/ageInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Age"
+            android:inputType="number"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/saveUserDetailsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Personal Details"
+            android:layout_marginTop="24dp" />
+
+        <!-- Change Email Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Email"
+            android:textSize="18sp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/emailInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Email"
+            android:inputType="textEmailAddress" />
+
+        <EditText
+            android:id="@+id/passwordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Current Password (required for email change)"
+            android:inputType="textPassword"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/saveEmailButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Email"
+            android:layout_marginTop="24dp" />
+
+        <!-- Change Password Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Change Password"
+            android:textSize="18sp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/currentPasswordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Current Password"
+            android:inputType="textPassword" />
+
+        <EditText
+            android:id="@+id/newPasswordInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="New Password"
+            android:inputType="textPassword"
+            android:layout_marginTop="16dp" />
+
+        <Button
+            android:id="@+id/savePasswordButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Password"
+            android:layout_marginTop="24dp" />
+
+        <!-- Go Back Button -->
+        <Button
+            android:id="@+id/goBackButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Go Back"
+            android:layout_marginTop="32dp" />
+    </LinearLayout>
+</ScrollView>
