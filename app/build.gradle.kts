@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.gms.google-services")
+    kotlin("kapt")
 }
 
 android {
@@ -54,6 +55,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-firestore:24.9.1")
     implementation("com.google.firebase:firebase-auth:22.0.0")
+    // SQLite
+    implementation ("androidx.room:room-runtime:2.5.2")
+    kapt ("androidx.room:room-compiler:2.5.2")
+    implementation ("androidx.room:room-ktx:2.5.2")
+
 
 
 
