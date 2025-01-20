@@ -1,5 +1,6 @@
 package com.example.reviewr.ui
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.WriteReviewFragmentBinding
@@ -21,6 +26,13 @@ class WriteReviewFragment : Fragment() {
 
     private var latitude: Float = 0f
     private var longitude: Float = 0f
+    private var reviewImageUrl: String? = null // URL of the uploaded image
+
+    private val imagePicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            uploadImageToCloudinary(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +61,11 @@ class WriteReviewFragment : Fragment() {
             handlePostReviewResult(result)
         }
 
+        // Upload image button
+        binding.uploadImageButton.setOnClickListener {
+            imagePicker.launch("image/*") // Open gallery to pick an image
+        }
+
         // Post review button
         binding.postReviewButton.setOnClickListener {
             postReview()
@@ -58,6 +75,38 @@ class WriteReviewFragment : Fragment() {
         binding.goBackButton.setOnClickListener {
             findNavController().navigateUp()
         }
+    }
+
+    private fun uploadImageToCloudinary(uri: Uri) {
+        MediaManager.get().upload(uri)
+            .option("folder", "review_images/")
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {
+                    Toast.makeText(requireContext(), "Uploading image...", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
+                    reviewImageUrl = resultData["secure_url"] as? String
+                    reviewImageUrl?.let {
+                        binding.reviewImageView.visibility = View.VISIBLE
+                        Glide.with(requireContext())
+                            .load(it)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .into(binding.reviewImageView)
+                        Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onError(requestId: String?, error: ErrorInfo) {
+                    Toast.makeText(requireContext(), "Failed to upload image: ${error.description}", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onReschedule(requestId: String?, error: ErrorInfo) {}
+
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
+                    // Optional: Track upload progress
+                }
+            }).dispatch()
     }
 
     private fun postReview() {
@@ -86,14 +135,13 @@ class WriteReviewFragment : Fragment() {
             "status" to status,
             "category" to category,
             "description" to description,
+            "imageUrl" to (reviewImageUrl ?: ""), // Include image URL if available
             "timestamp" to com.google.firebase.Timestamp.now()
         )
 
         // Post review using ViewModel
         reviewViewModel.postReview(review)
     }
-
-
 
     private fun handlePostReviewResult(result: Boolean?) {
         when (result) {
@@ -111,7 +159,6 @@ class WriteReviewFragment : Fragment() {
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

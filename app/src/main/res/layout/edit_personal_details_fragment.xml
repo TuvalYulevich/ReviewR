@@ -116,6 +116,30 @@
             android:text="Save Password"
             android:layout_marginTop="24dp" />
 
+        <!-- Edit Profile Picture Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Profile Picture"
+            android:textSize="18sp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/uploadProfilePictureButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Upload a New Profile Picture"
+            android:layout_marginTop="8dp" />
+
+        <Button
+            android:id="@+id/deleteProfilePictureButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Current Profile Picture"
+            android:layout_marginTop="16dp" />
+
         <!-- Go Back Button -->
         <Button
             android:id="@+id/goBackButton"

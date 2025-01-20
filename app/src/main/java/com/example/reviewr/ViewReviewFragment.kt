@@ -2,7 +2,6 @@ package com.example.reviewr
 
 import android.app.AlertDialog
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,12 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.example.reviewr.CommentAdapter.CommentAdapter
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.CommentPopupBinding
 import com.example.reviewr.databinding.ViewReviewFragmentBinding
 import com.google.firebase.auth.FirebaseAuth
-import com.example.reviewr.CommentAdapter.CommentAdapter
-import com.google.firebase.firestore.FirebaseFirestore
 
 class ViewReviewFragment : Fragment() {
 
@@ -94,16 +93,27 @@ class ViewReviewFragment : Fragment() {
             } else {
                 binding.reviewAuthor.text = "By: Unknown"
             }
+
             // Format and display the timestamp
             val timestamp = review["timestamp"] as? com.google.firebase.Timestamp
             val formattedDate = timestamp?.toDate()?.toString() ?: "Unknown Time"
             binding.reviewTime.text = formattedDate
+
+            // Load the review image if available
+            val imageUrl = review["imageUrl"] as? String
+            if (!imageUrl.isNullOrEmpty()) {
+                binding.reviewImageView.visibility = View.VISIBLE
+                Glide.with(requireContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_foreground) // Replace with your placeholder
+                    .into(binding.reviewImageView)
+            } else {
+                binding.reviewImageView.visibility = View.GONE // Hide the ImageView if no image is available
+            }
         } else {
             Toast.makeText(requireContext(), "Review not found.", Toast.LENGTH_SHORT).show()
         }
     }
-
-
 
     private fun showCommentPopup() {
         val builder = AlertDialog.Builder(requireContext())
@@ -149,10 +159,7 @@ class ViewReviewFragment : Fragment() {
         }
     }
 
-
-
     private fun updateCommentsUI(comments: List<Map<String, Any>>) {
-        Log.d("ViewReviewFragment", "Updating comments UI. Comments: $comments")
         if (comments.isEmpty()) {
             binding.commentsRecyclerView.visibility = View.GONE
             binding.noCommentsText.visibility = View.VISIBLE
@@ -165,6 +172,4 @@ class ViewReviewFragment : Fragment() {
             adapter.notifyDataSetChanged() // Ensure the RecyclerView refreshes
         }
     }
-
-
 }

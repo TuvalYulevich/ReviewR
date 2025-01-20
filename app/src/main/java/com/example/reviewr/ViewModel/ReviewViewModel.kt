@@ -50,8 +50,6 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
-
-
     // Fetch reviews from Firestore
     fun fetchReviews() {
         firestore.collection("posts")

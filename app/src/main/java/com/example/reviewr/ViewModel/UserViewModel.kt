@@ -1,17 +1,31 @@
 package com.example.reviewr.ViewModel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.reviewr.Data.AppDatabase
+import com.example.reviewr.Data.UserEntity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class UserViewModel : ViewModel() {
+class UserViewModel (application: Application) : AndroidViewModel(application) {
 
     private val auth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
+
+    private val database = AppDatabase.getInstance(application.applicationContext)
+    private val userDao = database.userDao()
+
+    init {
+        Log.d("DatabaseInit", "Database: $database, UserDao: $userDao")
+    }
 
     sealed class RegistrationResult {
         object Success : RegistrationResult()
@@ -27,7 +41,6 @@ class UserViewModel : ViewModel() {
         age: String,
     ): LiveData<RegistrationResult> {
         val result = MutableLiveData<RegistrationResult>()
-
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -84,14 +97,45 @@ class UserViewModel : ViewModel() {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    val firebaseUser = auth.currentUser
+                    if (firebaseUser != null) {
+                        // Fetch user data from Firestore
+                        firestore.collection("users").document(firebaseUser.uid)
+                            .get()
+                            .addOnSuccessListener { document ->
+                                if (document.exists()) {
+                                    val userEntity = UserEntity(
+                                        userId = firebaseUser.uid,
+                                        username = document.getString("username") ?: "Unknown",
+                                        firstName = document.getString("firstName") ?: "Unknown",
+                                        lastName = document.getString("lastName") ?: "Unknown",
+                                        email = document.getString("email") ?: email,
+                                        age = document.getString("age") ?: "Unknown"
+                                    )
+
+                                    // Save user data to Room on a background thread
+                                    viewModelScope.launch(Dispatchers.IO) {
+                                        try {
+                                            userDao.insertUser(userEntity)
+                                        } catch (e: Exception) {
+                                            Log.e("UserViewModel", "Database insert failed: ${e.message}")
+                                        }
+                                    }
+                                }
+                            }
+                            .addOnFailureListener { e ->
+                                Log.e("UserViewModel", "Failed to fetch user data: ${e.message}")
+                            }
+                    }
                     loginResult.value = LoginResult.Success
                 } else {
                     loginResult.value = LoginResult.Failure(task.exception?.message)
                 }
             }
-
         return loginResult
     }
+
+
 
     fun logout() {
         auth.signOut()
@@ -102,15 +146,57 @@ class UserViewModel : ViewModel() {
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    callback(document.data ?: emptyMap())
+                    val userData = document.data ?: emptyMap()
+                    // Return Firebase data
+                    callback(userData)
+                    // Optionally update cached data in Room
+                    val userEntity = UserEntity(
+                        userId = userData["userId"] as String,
+                        username = userData["username"] as? String ?: "Unknown",
+                        firstName = userData["firstName"] as? String ?: "Unknown",
+                        lastName = userData["lastName"] as? String ?: "Unknown",
+                        email = userData["email"] as? String ?: "Unknown",
+                        age = userData["age"] as? String ?: "Unknown"
+                    )
+                    viewModelScope.launch(Dispatchers.IO) {
+                        try {
+                            userDao.insertUser(userEntity) // Save to Room
+                        } catch (e: Exception) {
+                            Log.e("UserViewModel", "Error inserting user: ${e.message}")
+                        }
+                    }
                 } else {
-                    callback(emptyMap())
+                    callback(emptyMap()) // No data in Firebase
                 }
             }
-            .addOnFailureListener {
-                callback(emptyMap())
+            .addOnFailureListener { exception ->
+                Log.e("UserViewModel", "Failed to fetch user data from Firestore: ${exception.message}")
+                // Fallback to Room on Firebase failure
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        val cachedUser = userDao.getUser(userId)
+                        if (cachedUser != null) {
+                            val cachedData = mapOf(
+                                "userId" to cachedUser.userId,
+                                "username" to cachedUser.username,
+                                "firstName" to cachedUser.firstName,
+                                "lastName" to cachedUser.lastName,
+                                "email" to cachedUser.email,
+                                "age" to cachedUser.age
+                            )
+                            callback(cachedData) // Return cached data
+                        } else {
+                            callback(emptyMap()) // No cached data available
+                        }
+                    } catch (e: Exception) {
+                        Log.e("UserViewModel", "Error fetching cached user: ${e.message}")
+                        callback(emptyMap())
+                    }
+                }
             }
     }
+
+
 
 
     fun fetchReviewCount(userId: String, callback: (Int) -> Unit) {

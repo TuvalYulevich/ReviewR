@@ -4,6 +4,8 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.gms.google-services")
     kotlin("kapt")
+    id("kotlin-kapt")
+
 }
 
 android {
@@ -55,10 +57,20 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation ("com.google.firebase:firebase-firestore:24.9.1")
     implementation("com.google.firebase:firebase-auth:22.0.0")
-    // SQLite
+    // SQLite and Room
     implementation ("androidx.room:room-runtime:2.5.2")
     kapt ("androidx.room:room-compiler:2.5.2")
     implementation ("androidx.room:room-ktx:2.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    // Cloudinary
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+    // Glide
+    implementation ("com.github.bumptech.glide:glide:4.15.1")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
+    // OkHTTP
+    implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+
+
 
 
 
