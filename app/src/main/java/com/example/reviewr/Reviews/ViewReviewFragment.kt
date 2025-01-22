@@ -1,4 +1,4 @@
-package com.example.reviewr
+package com.example.reviewr.Reviews
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.reviewr.CommentAdapter.CommentAdapter
+import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.CommentPopupBinding
 import com.example.reviewr.databinding.ViewReviewFragmentBinding

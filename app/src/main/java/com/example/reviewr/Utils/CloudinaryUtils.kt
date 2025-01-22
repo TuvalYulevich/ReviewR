@@ -1,4 +1,4 @@
-package com.example.reviewr
+package com.example.reviewr.Utils
 
 import android.app.Application
 import com.cloudinary.android.MediaManager

@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.User
 
 
 import com.bumptech.glide.Glide

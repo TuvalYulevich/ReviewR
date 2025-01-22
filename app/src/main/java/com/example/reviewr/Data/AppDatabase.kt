@@ -1,11 +1,14 @@
 package com.example.reviewr.Data
 
 import android.content.Context
+import android.util.Log
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [UserEntity::class], version = 1, exportSchema = false)
+@Database(entities = [UserEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
 
@@ -13,23 +16,31 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE users ADD COLUMN profileImageUrl TEXT")
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 try {
+                    Log.d("AppDatabase", "Initializing Room database")
                     val instance = Room.databaseBuilder(
                         context.applicationContext,
                         AppDatabase::class.java,
                         "app_database"
-                    ).build()
+                    )
+                        .addMigrations(MIGRATION_1_2) // Use migration
+                        .build()
                     INSTANCE = instance
-                    println("AppDatabase initialized successfully.")
+                    Log.d("AppDatabase", "Database initialized successfully")
                     instance
                 } catch (e: Exception) {
-                    println("Error initializing AppDatabase: ${e.message}")
+                    Log.e("AppDatabase", "Error initializing Room: ${e.message}")
                     throw e
                 }
             }
         }
     }
 }
-

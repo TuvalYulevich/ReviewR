@@ -12,6 +12,9 @@ interface UserDao {
     // Insert or update a user
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(user: UserEntity): Unit
+
+    @Query("DELETE FROM users WHERE userId = :userId")
+    fun deleteCurrentUser(userId: String): Int
 }
 
 

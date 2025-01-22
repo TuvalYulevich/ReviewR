@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Map
 
 import android.Manifest
 import android.app.AlertDialog
@@ -18,8 +18,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.example.reviewr.FilterDialogFragment
-import com.example.reviewr.NetworkUtils
+import com.example.reviewr.Utils.NetworkUtils
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.MapFragmentBinding

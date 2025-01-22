@@ -18,9 +18,16 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                argument("room.incremental", "true")
+            }
+        }
     }
+
+
 
     buildTypes {
         release {
@@ -69,6 +76,9 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.15.1")
     // OkHTTP
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
+    // Material
+    implementation ("com.google.android.material:material:1.9.0")
+
 
 
 

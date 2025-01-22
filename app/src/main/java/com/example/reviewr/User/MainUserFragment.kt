@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.User
 
 import android.content.Context
 import android.os.Bundle
@@ -11,9 +11,8 @@ import com.example.reviewr.R
 import com.example.reviewr.databinding.MainUserFragmentBinding
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import com.example.reviewr.NetworkUtils
-import com.example.reviewr.SearchDialogFragment
+import com.example.reviewr.Utils.NetworkUtils
+import com.example.reviewr.Map.SearchDialogFragment
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.ViewModel.UserViewModel
 

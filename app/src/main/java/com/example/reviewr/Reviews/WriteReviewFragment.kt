@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Reviews
 
 import android.net.Uri
 import android.os.Bundle
