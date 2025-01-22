@@ -56,6 +56,15 @@
             android:text="Upload Image"
             android:layout_marginTop="16dp" />
 
+        <ImageView
+            android:id="@+id/reviewImageView"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            android:contentDescription="Uploaded Review Image"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/postReviewButton"
             android:layout_width="match_parent"

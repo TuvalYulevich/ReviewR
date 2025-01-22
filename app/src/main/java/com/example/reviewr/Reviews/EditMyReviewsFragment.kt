@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Reviews
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.reviewr.R
 import com.example.reviewr.ViewModel.CommentViewModel
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.adapters.ReviewAdapter

@@ -1,12 +1,12 @@
-package com.example.reviewr
+package com.example.reviewr.Map
 
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.Spinner
 import androidx.fragment.app.DialogFragment
+import com.example.reviewr.R
 
 class FilterDialogFragment(private val onFilterAction: (String, Map<String, String>?) -> Unit) : DialogFragment() {
 

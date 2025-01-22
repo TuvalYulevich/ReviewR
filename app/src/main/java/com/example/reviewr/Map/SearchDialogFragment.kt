@@ -1,4 +1,4 @@
-package com.example.reviewr
+package com.example.reviewr.Map
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Spinner
 import androidx.fragment.app.DialogFragment
+import com.example.reviewr.R
 
 
 class SearchDialogFragment(private val onSearchApplied: (Map<String, String>) -> Unit) : DialogFragment() {

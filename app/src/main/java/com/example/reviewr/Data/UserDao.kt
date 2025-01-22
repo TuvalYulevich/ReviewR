@@ -4,9 +4,19 @@ import androidx.room.*
 
 @Dao
 interface UserDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertUser(user: UserEntity)
 
-    @Query("SELECT * FROM users WHERE id = :id")
-    suspend fun getUserById(id: String): UserEntity?
+    // Query to fetch a user by ID
+    @Query("SELECT * FROM users WHERE userId = :userId LIMIT 1")
+    fun getUser(userId: String): UserEntity?
+
+    // Insert or update a user
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertUser(user: UserEntity): Unit
+
+    @Query("DELETE FROM users WHERE userId = :userId")
+    fun deleteCurrentUser(userId: String): Int
 }
+
+
+
+

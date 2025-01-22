@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Map
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -4,9 +4,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- DON'T FORGET TO REMOVE debuggable=true-->
     <application
+        android:name=".Utils.CloudinaryUtils"
         android:allowBackup="true"
+        android:debuggable="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -29,9 +32,6 @@
         <meta-data
             android:name="org.osmdroid.config"
             android:value="default" />
-
-
-
 
     </application>
 

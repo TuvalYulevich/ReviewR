@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.User
 
 import android.content.Context
 import android.os.Bundle
@@ -11,8 +11,8 @@ import com.example.reviewr.R
 import com.example.reviewr.databinding.MainUserFragmentBinding
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
-import com.example.reviewr.SearchDialogFragment
+import com.example.reviewr.Utils.NetworkUtils
+import com.example.reviewr.Map.SearchDialogFragment
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.ViewModel.UserViewModel
 
@@ -50,7 +50,12 @@ class MainUserFragment : Fragment() {
 
         binding.mapButton.setOnClickListener {
             // Navigate to Map Screen
-            findNavController().navigate(R.id.action_mainUserFragment_to_mapFragment)
+            if(NetworkUtils.isOnline(requireContext())) {
+                findNavController().navigate(R.id.action_mainUserFragment_to_mapFragment)
+            }
+            else {
+                Toast.makeText(requireContext(), "You cannot enter map when offline.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Initialize ViewModel
@@ -58,6 +63,7 @@ class MainUserFragment : Fragment() {
 
 // Set up the search button click listener
         binding.searchReviewsButton.setOnClickListener {
+            if (NetworkUtils.isOnline(requireContext())){
             val dialog = SearchDialogFragment { filters ->
                 when (filters["action"]) {
                     "showAll" -> {
@@ -67,6 +73,7 @@ class MainUserFragment : Fragment() {
                             MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
                         )
                     }
+
                     "applyFilters" -> {
                         // Apply filters and navigate to SearchResultsFragment
                         reviewViewModel.applyFilters2(filters)
@@ -77,6 +84,10 @@ class MainUserFragment : Fragment() {
                 }
             }
             dialog.show(parentFragmentManager, "SearchDialog")
+        }
+            else{
+                Toast.makeText(requireContext(), "You cannot search when offline.", Toast.LENGTH_SHORT).show()
+            }
         }
 
 
@@ -106,4 +117,3 @@ class MainUserFragment : Fragment() {
         _binding = null
     }
 }
-

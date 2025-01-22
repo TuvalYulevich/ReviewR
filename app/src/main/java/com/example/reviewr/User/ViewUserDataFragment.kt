@@ -1,11 +1,14 @@
-package com.example.reviewr.ui
+package com.example.reviewr.User
 
+
+import com.bumptech.glide.Glide
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.example.reviewr.R
 import com.example.reviewr.ViewModel.UserViewModel
 import com.example.reviewr.databinding.ViewUserDataFragmentBinding
 
@@ -31,13 +34,26 @@ class ViewUserDataFragment : Fragment() {
 
         val userId = userViewModel.getCurrentUser()?.uid ?: return
 
-        // Fetch personal details
+        // Fetch personal details, including the profile picture
         userViewModel.fetchUserDetails(userId) { userDetails ->
             binding.usernameText.text = "Username: ${userDetails["username"] ?: "N/A"}"
             binding.firstNameText.text = "First Name: ${userDetails["firstName"] ?: "N/A"}"
             binding.lastNameText.text = "Last Name: ${userDetails["lastName"] ?: "N/A"}"
             binding.emailText.text = "Email: ${userDetails["email"] ?: "N/A"}"
             binding.ageText.text = "Age: ${userDetails["age"] ?: "N/A"}"
+
+            // Load the profile picture using Glide
+            val profilePictureUrl = userDetails["profilePictureUrl"] as? String
+            if (!profilePictureUrl.isNullOrEmpty()) {
+                Glide.with(requireContext())
+                    .load(profilePictureUrl) // Load the profile picture URL
+                    .placeholder(R.drawable.ic_launcher_foreground) // Default image while loading
+                    .error(R.drawable.ic_launcher_foreground) // Default image on error
+                    .into(binding.profilePicture) // Target ImageView
+            } else {
+                // Show default profile picture if no URL is available
+                binding.profilePicture.setImageResource(R.drawable.ic_launcher_foreground)
+            }
         }
 
         // Fetch review and comment counts

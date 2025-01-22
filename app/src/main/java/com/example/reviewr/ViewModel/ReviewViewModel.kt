@@ -1,12 +1,21 @@
 package com.example.reviewr.ViewModel
 
+import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 
 class ReviewViewModel : ViewModel() {
 
@@ -37,6 +46,73 @@ class ReviewViewModel : ViewModel() {
         _filteredReviews.value = reviews
     }
 
+
+    var imageUploadStatus = MutableLiveData<Pair<Boolean, String?>>()
+
+    fun uploadReviewImage(uri: Uri) {
+        MediaManager.get().upload(uri)
+            .option("folder", "review_images/")
+            .callback(object : UploadCallback {
+                override fun onStart(requestId: String?) {
+                    // Optionally indicate the upload started
+                }
+
+                override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
+                    val imageUrl = resultData["secure_url"] as? String
+                    imageUploadStatus.postValue(Pair(true, imageUrl))
+                }
+
+                override fun onError(requestId: String?, error: ErrorInfo) {
+                    imageUploadStatus.postValue(Pair(false, null))
+                }
+
+                override fun onReschedule(requestId: String?, error: ErrorInfo) {}
+
+                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+            }).dispatch()
+    }
+
+
+
+    fun deleteReviewImage(imageUrl: String, callback: (Boolean) -> Unit) {
+        val publicId = "review_images/" + imageUrl.substringAfterLast("/").substringBeforeLast(".")
+        Log.d("ReviewViewModel", "Public ID for deletion: $publicId")
+        val requestBody = FormBody.Builder()
+            .add("public_id", publicId)
+            .add("invalidate", "true")
+            .build()
+        val request = Request.Builder()
+            .url("https://api.cloudinary.com/v1_1/dm8sulfig/image/destroy")
+            .post(requestBody)
+            .addHeader(
+                "Authorization",
+                "Basic ${
+                    Base64.encodeToString(
+                        "129181168733979:uNaILxRogPyZ_FTQtnOWEQ-Tq5Y".toByteArray(),
+                        Base64.NO_WRAP
+                    )
+                }"
+            )
+            .build()
+        OkHttpClient().newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                Log.e("ReviewViewModel", "Failed to delete image: ${e.message}")
+                callback(false)
+            }
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                if (response.isSuccessful) {
+                    Log.d("ReviewViewModel", "Successfully deleted image.")
+                    callback(true)
+                } else {
+                    Log.e("ReviewViewModel", "Failed to delete image: ${response.body?.string()}")
+                    callback(false)
+                }
+            }
+        })
+    }
+
+
+
     fun fetchAllReviews() {
         firestore.collection("posts")
             .get()
@@ -49,8 +125,6 @@ class ReviewViewModel : ViewModel() {
                 _filteredReviews.value = emptyList()
             }
     }
-
-
 
     // Fetch reviews from Firestore
     fun fetchReviews() {

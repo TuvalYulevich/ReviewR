@@ -1,4 +1,4 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Map
 
 import android.Manifest
 import android.app.AlertDialog
@@ -12,12 +12,13 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.example.reviewr.FilterDialogFragment
+import com.example.reviewr.Utils.NetworkUtils
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.MapFragmentBinding
@@ -321,20 +322,25 @@ class MapFragment : Fragment() {
 
 
     private fun showAddReviewDialog(location: GeoPoint) {
-        val builder = AlertDialog.Builder(requireContext())
-        builder.setTitle("Add Review")
-        builder.setMessage("Would you like to write a review for this location?")
-        builder.setPositiveButton("Yes") { _, _ ->
-            val action = MapFragmentDirections.actionMapFragmentToWriteReviewFragment(
-                location.latitude.toFloat(),
-                location.longitude.toFloat()
-            )
-            findNavController().navigate(action)
+        if(NetworkUtils.isOnline(requireContext())) {
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Add Review")
+            builder.setMessage("Would you like to write a review for this location?")
+            builder.setPositiveButton("Yes") { _, _ ->
+                val action = MapFragmentDirections.actionMapFragmentToWriteReviewFragment(
+                    location.latitude.toFloat(),
+                    location.longitude.toFloat()
+                )
+                findNavController().navigate(action)
+            }
+            builder.setNegativeButton("No") { dialog, _ ->
+                dialog.dismiss()
+            }
+            builder.show()
         }
-        builder.setNegativeButton("No") { dialog, _ ->
-            dialog.dismiss()
+        else{
+            Toast.makeText(requireContext(), "You cannot add review when offline.", Toast.LENGTH_SHORT).show()
         }
-        builder.show()
     }
 
     private fun showReviewDialog(postId: String) {

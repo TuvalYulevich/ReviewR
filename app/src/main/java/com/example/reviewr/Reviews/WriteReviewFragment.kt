@@ -1,13 +1,19 @@
-package com.example.reviewr.ui
+package com.example.reviewr.Reviews
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.WriteReviewFragmentBinding
@@ -21,6 +27,14 @@ class WriteReviewFragment : Fragment() {
 
     private var latitude: Float = 0f
     private var longitude: Float = 0f
+
+    private var reviewImageUrl: String? = null // URL of the uploaded image
+
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let {
+            reviewViewModel.uploadReviewImage(it)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +63,25 @@ class WriteReviewFragment : Fragment() {
             handlePostReviewResult(result)
         }
 
+        // Upload image button
+        binding.uploadImageButton.setOnClickListener {
+            imagePicker.launch("image/*")
+        }
+
+        reviewViewModel.imageUploadStatus.observe(viewLifecycleOwner) { (success, imageUrl) ->
+            if (success && imageUrl != null) {
+                reviewImageUrl = imageUrl
+                binding.reviewImageView.visibility = View.VISIBLE
+                Glide.with(requireContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .into(binding.reviewImageView)
+                Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Failed to upload image.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // Post review button
         binding.postReviewButton.setOnClickListener {
             postReview()
@@ -59,6 +92,8 @@ class WriteReviewFragment : Fragment() {
             findNavController().navigateUp()
         }
     }
+
+
 
     private fun postReview() {
         val title = binding.reviewTitle.text.toString()
@@ -86,14 +121,13 @@ class WriteReviewFragment : Fragment() {
             "status" to status,
             "category" to category,
             "description" to description,
+            "imageUrl" to (reviewImageUrl ?: ""), // Include image URL if available
             "timestamp" to com.google.firebase.Timestamp.now()
         )
 
         // Post review using ViewModel
         reviewViewModel.postReview(review)
     }
-
-
 
     private fun handlePostReviewResult(result: Boolean?) {
         when (result) {
@@ -111,7 +145,6 @@ class WriteReviewFragment : Fragment() {
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -48,7 +48,7 @@
     <!-- MainUserScreen Fragment -->
     <fragment
         android:id="@+id/mainUserFragment"
-        android:name="com.example.reviewr.ui.MainUserFragment"
+        android:name="com.example.reviewr.User.MainUserFragment"
         android:label="MainUserFragment"
         tools:layout="@layout/main_user_fragment">
         <action
@@ -69,7 +69,7 @@
     <!-- Map Fragment -->
     <fragment
         android:id="@+id/mapFragment"
-        android:name="com.example.reviewr.ui.MapFragment"
+        android:name="com.example.reviewr.Map.MapFragment"
         android:label="MapFragment"
         tools:layout="@layout/map_fragment">
         <action
@@ -87,7 +87,7 @@
     <!-- Write A Review Fragment -->
     <fragment
         android:id="@+id/writeReviewFragment"
-        android:name="com.example.reviewr.ui.WriteReviewFragment"
+        android:name="com.example.reviewr.Reviews.WriteReviewFragment"
         android:label="Write A Review"
         tools:layout="@layout/write_review_fragment">
         <argument
@@ -101,7 +101,7 @@
     <!-- View Review Fragment -->
     <fragment
         android:id="@+id/viewReviewFragment"
-        android:name="com.example.reviewr.ViewReviewFragment"
+        android:name="com.example.reviewr.Reviews.ViewReviewFragment"
         android:label="View Review"
         tools:layout="@layout/view_review_fragment">
         <argument
@@ -112,7 +112,7 @@
     <!-- View User Information Fragment -->
     <fragment
         android:id="@+id/viewUserInformationFragment"
-        android:name="com.example.reviewr.ui.ViewUserInformationFragment"
+        android:name="com.example.reviewr.User.ViewUserInformationFragment"
         android:label="View Information"
         tools:layout="@layout/view_user_information_fragment">
         <action
@@ -135,21 +135,21 @@
     <!-- View User Data Fragment -->
     <fragment
         android:id="@+id/viewUserDataFragment"
-        android:name="com.example.reviewr.ui.ViewUserDataFragment"
+        android:name="com.example.reviewr.User.ViewUserDataFragment"
         android:label="View User Data"
         tools:layout="@layout/view_user_data_fragment"/>
 
     <!-- Edit Peronal User Details Fragment -->
     <fragment
         android:id="@+id/editPersonalDetailsFragment"
-        android:name="com.example.reviewr.ui.EditPersonalDetailsFragment"
+        android:name="com.example.reviewr.User.EditPersonalDetailsFragment"
         android:label="Edit Personal Details"
         tools:layout="@layout/edit_personal_details_fragment" />
 
     <!-- Edit My Reviews  Fragment -->
     <fragment
         android:id="@+id/editMyReviewsFragment"
-        android:name="com.example.reviewr.ui.EditMyReviewsFragment"
+        android:name="com.example.reviewr.Reviews.EditMyReviewsFragment"
         android:label="Edit My Reviews"
         tools:layout="@layout/edit_my_reviews_fragment">
         <action
@@ -160,7 +160,7 @@
     <!-- Edit A Review  Fragment -->
     <fragment
         android:id="@+id/editReviewFragment"
-        android:name="com.example.reviewr.ui.EditReviewFragment"
+        android:name="com.example.reviewr.Reviews.EditReviewFragment"
         android:label="Edit Review"
         tools:layout="@layout/edit_review_fragment">
         <argument
@@ -171,7 +171,7 @@
     <!-- Edit My Comments  Fragment -->
     <fragment
         android:id="@+id/editMyCommentsFragment"
-        android:name="com.example.reviewr.ui.EditMyCommentsFragment"
+        android:name="com.example.reviewr.Comments.EditMyCommentsFragment"
         android:label="Edit My Comments"
         tools:layout="@layout/edit_my_comments_fragment">
         <action
@@ -182,7 +182,7 @@
     <!-- Edit A Comment  Fragment -->
     <fragment
         android:id="@+id/editCommentFragment"
-        android:name="com.example.reviewr.ui.EditCommentFragment"
+        android:name="com.example.reviewr.Comments.EditCommentFragment"
         android:label="Edit Comment"
         tools:layout="@layout/edit_comment_fragment">
         <argument
@@ -194,7 +194,7 @@
     <!-- Search Results Fragment -->
     <fragment
         android:id="@+id/searchResultsFragment"
-        android:name="com.example.reviewr.ui.SearchResultsFragment"
+        android:name="com.example.reviewr.Map.SearchResultsFragment"
         tools:layout="@layout/search_results_fragment">
         <action
             android:id="@+id/action_searchResultsFragment_to_viewReviewFragment"
