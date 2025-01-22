@@ -146,7 +146,7 @@
         android:label="Edit Personal Details"
         tools:layout="@layout/edit_personal_details_fragment" />
 
-    <!-- Edit My Reviews  Fragment -->
+    <!-- Edit My Reviews Fragment -->
     <fragment
         android:id="@+id/editMyReviewsFragment"
         android:name="com.example.reviewr.Reviews.EditMyReviewsFragment"
@@ -155,6 +155,9 @@
         <action
             android:id="@+id/action_editMyReviewsFragment_to_editReviewFragment"
             app:destination="@id/editReviewFragment" />
+        <action
+            android:id="@+id/actionEditMyReviewsFragmentToViewReviewFragment"
+            app:destination="@id/viewReviewFragment" />
     </fragment>
 
     <!-- Edit A Review  Fragment -->
