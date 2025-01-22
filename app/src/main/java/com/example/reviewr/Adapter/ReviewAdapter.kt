@@ -10,12 +10,11 @@ import com.example.reviewr.R
 
 class ReviewAdapter(
     private val reviews: List<Map<String, Any>>,
-    private val showEditDeleteButtons: Boolean = true, // Default to true for other fragments
-    private val onEditClicked: (Map<String, Any>) -> Unit,
-    private val onDeleteClicked: (String) -> Unit
+    private val showEditDeleteButtons: Boolean = true,
+    private val onEditClicked: ((Map<String, Any>) -> Unit)? = null, // Nullable callback
+    private val onDeleteClicked: ((String) -> Unit)? = null, // Nullable callback
+    private val onItemClicked: ((String) -> Unit)? = null // Nullable callback
 ) : RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder>() {
-
-    private var onItemClickListener: ((Map<String, Any>) -> Unit)? = null
 
     inner class ReviewViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.reviewTitle)
@@ -29,7 +28,8 @@ class ReviewAdapter(
             itemView.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    onItemClickListener?.invoke(reviews[position])
+                    val postId = reviews[position]["postId"] as? String
+                    postId?.let { onItemClicked?.invoke(it) } // Call item click listener
                 }
             }
         }
@@ -47,25 +47,21 @@ class ReviewAdapter(
         holder.status.text = "Status: ${review["status"] as? String ?: "Unknown"}"
         holder.category.text = "Category: ${review["category"] as? String ?: "Unknown"}"
 
+        // Set visibility and click listeners for edit and delete buttons
         if (showEditDeleteButtons) {
             holder.editButton.visibility = View.VISIBLE
             holder.deleteButton.visibility = View.VISIBLE
-            holder.editButton.setOnClickListener { onEditClicked(review) }
+            holder.editButton.setOnClickListener { onEditClicked?.invoke(review) }
             holder.deleteButton.setOnClickListener {
                 val postId = review["postId"] as? String ?: return@setOnClickListener
-                onDeleteClicked(postId)
+                onDeleteClicked?.invoke(postId)
             }
         } else {
             holder.editButton.visibility = View.GONE
             holder.deleteButton.visibility = View.GONE
         }
     }
-
     override fun getItemCount(): Int = reviews.size
-
-    fun setOnItemClickListener(listener: (Map<String, Any>) -> Unit) {
-        onItemClickListener = listener
-    }
 }
 
 

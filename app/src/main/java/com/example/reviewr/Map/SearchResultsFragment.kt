@@ -39,18 +39,15 @@ class SearchResultsFragment : Fragment() {
         reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
             val adapter = ReviewAdapter(
                 reviews = reviews,
-                showEditDeleteButtons = false, // Hide edit and delete buttons for search results
-                onEditClicked = {},
-                onDeleteClicked = {}
+                showEditDeleteButtons = false, // Hide edit/delete buttons
+                onItemClicked = { postId ->
+                    val action = SearchResultsFragmentDirections.actionSearchResultsFragmentToViewReviewFragment(postId)
+                    findNavController().navigate(action)
+                }
             )
-            adapter.setOnItemClickListener { review ->
-                val postId = review["postId"] as? String ?: return@setOnItemClickListener
-                findNavController().navigate(
-                    SearchResultsFragmentDirections.actionSearchResultsFragmentToViewReviewFragment(postId)
-                )
-            }
             recyclerView.adapter = adapter
         }
+
 
         // Go back functionality
         goBackButton.setOnClickListener {

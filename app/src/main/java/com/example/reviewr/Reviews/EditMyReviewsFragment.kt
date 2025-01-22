@@ -48,6 +48,7 @@ class EditMyReviewsFragment : Fragment() {
 
                 val adapter = ReviewAdapter(
                     reviews = reviews,
+                    showEditDeleteButtons = true, // Show edit/delete buttons
                     onEditClicked = { review ->
                         val postId = review["postId"] as? String ?: return@ReviewAdapter
                         val action = EditMyReviewsFragmentDirections.actionEditMyReviewsFragmentToEditReviewFragment(postId)
@@ -81,9 +82,14 @@ class EditMyReviewsFragment : Fragment() {
                                 Toast.makeText(requireContext(), "Failed to delete comments for the review.", Toast.LENGTH_SHORT).show()
                             }
                         }
+                    },
+                    onItemClicked = { postId ->
+                        val action = EditMyReviewsFragmentDirections.actionEditMyReviewsFragmentToViewReviewFragment(postId)
+                        findNavController().navigate(action)
                     }
                 )
                 binding.reviewsRecyclerView.adapter = adapter
+
             }
         }
 
