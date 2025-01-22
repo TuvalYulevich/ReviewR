@@ -1,12 +1,17 @@
 package com.example.reviewr.ViewModel
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import android.util.Base64
 import androidx.lifecycle.viewModelScope
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
+import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.Data.AppDatabase
 import com.example.reviewr.Data.UserEntity
 import com.google.firebase.auth.EmailAuthProvider
@@ -15,6 +20,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
+import okhttp3.Callback
+import okhttp3.Response
+import java.security.MessageDigest
+
 
 class UserViewModel (application: Application) : AndroidViewModel(application) {
 
@@ -24,6 +37,7 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
     private val database = AppDatabase.getInstance(application.applicationContext)
     private val userDao = database.userDao()
 
+
     init {
         Log.d("DatabaseInit", "Database: $database, UserDao: $userDao")
     }
@@ -32,6 +46,112 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
         object Success : RegistrationResult()
         data class Failure(val message: String?) : RegistrationResult()
     }
+
+
+    fun uploadProfileImage(uri: Uri): LiveData<Pair<Boolean, String?>> {
+        val uploadStatus = MutableLiveData<Pair<Boolean, String?>>()
+
+        try {
+            MediaManager.get().upload(uri)
+                .option("folder", "profile_pictures/")
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {
+                        Log.d("UserViewModel", "Uploading image started...")
+                    }
+
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
+                        val imageUrl = resultData["secure_url"] as? String
+                        if (!imageUrl.isNullOrEmpty()) {
+                            Log.d("UserViewModel", "Image uploaded successfully: $imageUrl")
+                            uploadStatus.postValue(Pair(true, imageUrl))
+                        } else {
+                            Log.e("UserViewModel", "Image upload failed: No secure_url found")
+                            uploadStatus.postValue(Pair(false, null))
+                        }
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo) {
+                        Log.e("UserViewModel", "Image upload failed: ${error.description}")
+                        uploadStatus.postValue(Pair(false, error.description))
+                    }
+
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo) {}
+                }).dispatch()
+        } catch (e: IllegalStateException) {
+            Log.e("UserViewModel", "MediaManager not initialized: ${e.message}")
+            uploadStatus.postValue(Pair(false, "MediaManager not initialized. Restart the app."))
+        }
+
+        return uploadStatus
+    }
+
+
+    fun deleteProfileImage(imageUrl: String, callback: ((Boolean) -> Unit)? = null) {
+        // Replace with your Cloudinary credentials
+        val CLOUD_NAME = "dm8sulfig"
+        val API_KEY = "129181168733979"
+        val API_SECRET = "uNaILxRogPyZ_FTQtnOWEQ-Tq5Y"
+
+        // Extract the public ID from the URL
+        val publicId = "profile_pictures/" + imageUrl.substringAfterLast("/").substringBeforeLast(".")
+        Log.d("Cloudinary", "Public ID: $publicId")
+
+        // Generate the timestamp (current time in seconds)
+        val timestamp = (System.currentTimeMillis() / 1000).toString()
+        Log.d("Cloudinary", "Timestamp: $timestamp")
+
+        // Generate the signature string
+        val signatureString = "public_id=$publicId&timestamp=$timestamp$API_SECRET"
+        val signature = MessageDigest.getInstance("SHA-1")
+            .digest(signatureString.toByteArray())
+            .joinToString("") { "%02x".format(it) } // Generate SHA-1 signature
+        Log.d("Cloudinary", "Signature String: $signatureString")
+        Log.d("Cloudinary", "Signature: $signature")
+
+        // Prepare the API URL and request
+        val requestUrl = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy"
+        Log.d("Cloudinary", "Request URL: $requestUrl")
+
+        val requestBody = FormBody.Builder()
+            .add("public_id", publicId)
+            .add("timestamp", timestamp)
+            .add("signature", signature)
+            .add("invalidate", "true")
+            .build()
+
+        // Optional: Authorization header
+        val authHeader = "Basic ${Base64.encodeToString("$API_KEY:$API_SECRET".toByteArray(), Base64.NO_WRAP)}"
+        Log.d("Cloudinary", "Authorization Header: $authHeader")
+
+        val request = Request.Builder()
+            .url(requestUrl)
+            .post(requestBody)
+            .addHeader("Authorization", authHeader) // Optional, might not be needed
+            .build()
+
+        // Make the HTTP request
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: IOException) {
+                Log.e("Cloudinary", "Failed to delete image: ${e.message}")
+                callback?.invoke(false)
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+                val responseBody = response.body?.string() ?: "No response body"
+                if (response.isSuccessful) {
+                    Log.d("Cloudinary", "Successfully deleted image: $publicId, Response: $responseBody")
+                    callback?.invoke(true)
+                } else {
+                    Log.e("Cloudinary", "Failed to delete image: ${response.message}, Response: $responseBody")
+                    callback?.invoke(false)
+                }
+            }
+        })
+    }
+
 
 
 

@@ -2,6 +2,7 @@ package com.example.reviewr.Reviews
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -129,88 +130,55 @@ class EditReviewFragment : Fragment() {
     }
 
     private fun uploadNewImage(uri: Uri) {
-        MediaManager.get().upload(uri)
-            .option("folder", "review_images/")
-            .callback(object : UploadCallback {
-                override fun onStart(requestId: String?) {
-                    Toast.makeText(requireContext(), "Uploading image...", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
-                    currentImageUrl = resultData["secure_url"] as? String
-                    currentImageUrl?.let {
-                        binding.reviewImageView.visibility = View.VISIBLE
-                        Glide.with(requireContext())
-                            .load(it)
-                            .placeholder(R.drawable.ic_launcher_foreground)
-                            .into(binding.reviewImageView)
-                        Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onError(requestId: String?, error: ErrorInfo) {
-                    Toast.makeText(requireContext(), "Failed to upload image: ${error.description}", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onReschedule(requestId: String?, error: ErrorInfo) {}
-
-                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                    // Optional: Track upload progress
-                }
-            }).dispatch()
+        reviewViewModel.uploadReviewImage(uri)
+        reviewViewModel.imageUploadStatus.observe(viewLifecycleOwner) { (success, imageUrl) ->
+            if (success && imageUrl != null) {
+                currentImageUrl = imageUrl
+                binding.reviewImageView.visibility = View.VISIBLE
+                Glide.with(requireContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .into(binding.reviewImageView)
+                Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Failed to upload image.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun deleteCurrentImage() {
-        val publicId = currentImageUrl?.substringAfterLast("/")?.substringBeforeLast(".")
-        if (publicId.isNullOrEmpty()) {
-            Toast.makeText(requireContext(), "No image to delete.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-
-
-        val cloudName = "dm8sulfig"  // Replace with your Cloudinary cloud name
-        val apiKey = "253965312649661"       // Replace with your Cloudinary API key
-        val apiSecret = "HR8e9mCNeDklFHZuCLznYxHRGNQ" // Replace with your Cloudinary API secret
-
-        val requestBody = okhttp3.FormBody.Builder()
-            .add("public_id", publicId)
-            .add("invalidate", "true")
-            .build()
-
-        val request = okhttp3.Request.Builder()
-            .url("https://api.cloudinary.com/v1_1/$cloudName/image/destroy")
-            .post(requestBody)
-            .addHeader(
-                "Authorization",
-                "Basic ${android.util.Base64.encodeToString(
-                    "$apiKey:$apiSecret".toByteArray(),
-                    android.util.Base64.NO_WRAP
-                )}"
-            )
-            .build()
-
-        val client = okhttp3.OkHttpClient()
-        client.newCall(request).enqueue(object : okhttp3.Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
+        currentImageUrl?.let { imageUrl ->
+            val postId = args.postId // Ensure you have the postId from arguments
+            // First, update the review in Firebase to remove the image URL
+            val updatedReviewData = mapOf("imageUrl" to "")
+            reviewViewModel.updateReview(postId, updatedReviewData) { updateSuccess ->
                 requireActivity().runOnUiThread {
-                    Toast.makeText(requireContext(), "Failed to delete image: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
-                requireActivity().runOnUiThread {
-                    if (response.isSuccessful) {
-                        Toast.makeText(requireContext(), "Image deleted successfully.", Toast.LENGTH_SHORT).show()
+                    if (updateSuccess) {
+                        // Update UI immediately after Firebase update
+                        Toast.makeText(requireContext(), "Image removed from review.", Toast.LENGTH_SHORT).show()
                         currentImageUrl = null
                         binding.reviewImageView.visibility = View.GONE
+
+                        // Proceed to delete the image from Cloudinary
+                        reviewViewModel.deleteReviewImage(imageUrl) { deleteSuccess ->
+                            if (!deleteSuccess) {
+                                Log.e("EditReviewFragment", "Failed to delete image from Cloudinary.")
+                            }
+                        }
                     } else {
-                        Toast.makeText(requireContext(), "Failed to delete image: ${response.body?.string()}", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Failed to remove image from review.", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
-        })
+        } ?: run {
+            Toast.makeText(requireContext(), "No image to delete.", Toast.LENGTH_SHORT).show()
+        }
     }
+
+
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

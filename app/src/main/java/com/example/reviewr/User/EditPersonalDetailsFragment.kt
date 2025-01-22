@@ -32,9 +32,6 @@ class EditPersonalDetailsFragment : Fragment() {
         uri?.let { uploadNewProfilePicture(it) }
     }
 
-    private val CLOUD_NAME = "dm8sulfig"
-    private val API_KEY = "253965312649661"
-    private val API_SECRET = "HR8e9mCNeDklFHZuCLznYxHRGNQ"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -122,7 +119,21 @@ class EditPersonalDetailsFragment : Fragment() {
 
         // Delete current profile picture
         binding.deleteProfilePictureButton.setOnClickListener {
-            deleteCurrentProfilePicture()
+            userViewModel.fetchUserDetails(userId) { userDetails ->
+                val profilePictureUrl = userDetails["profilePictureUrl"] as? String ?: return@fetchUserDetails
+                userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to "")) { success ->
+                    if (success) {
+                        Toast.makeText(requireContext(), "Profile picture removed successfully!", Toast.LENGTH_SHORT).show()
+                        userViewModel.deleteProfileImage(profilePictureUrl) { deleteSuccess ->
+                            if (!deleteSuccess) {
+                                Log.e("EditPersonalDetails", "Failed to delete image from Cloudinary.")
+                            }
+                        }
+                    } else {
+                        Toast.makeText(requireContext(), "Failed to remove profile picture.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
         // Go back button
@@ -132,92 +143,35 @@ class EditPersonalDetailsFragment : Fragment() {
     }
 
     private fun uploadNewProfilePicture(uri: Uri) {
-        userViewModel.fetchUserDetails(userViewModel.getCurrentUser()?.uid ?: return) { userDetails ->
+        val userId = userViewModel.getCurrentUser()?.uid ?: return
+        userViewModel.fetchUserDetails(userId) { userDetails ->
             val oldProfilePictureUrl = userDetails["profilePictureUrl"] as? String
 
-            MediaManager.get().upload(uri)
-                .option("folder", "profile_pictures/")
-                .callback(object : UploadCallback {
-                    override fun onStart(requestId: String?) {
-                        Toast.makeText(requireContext(), "Uploading new profile picture...", Toast.LENGTH_SHORT).show()
-                    }
-
-                    override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
-                        val newProfilePictureUrl = resultData["secure_url"] as String
-                        val userId = userViewModel.getCurrentUser()?.uid ?: return
-
-                        userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to newProfilePictureUrl)) { success ->
-                            if (success) {
-                                Toast.makeText(requireContext(), "Profile picture updated successfully.", Toast.LENGTH_SHORT).show()
-                                oldProfilePictureUrl?.let { deleteImageFromCloudinary(it) }
-                            } else {
-                                Toast.makeText(requireContext(), "Failed to update profile picture in Firebase.", Toast.LENGTH_SHORT).show()
+            userViewModel.uploadProfileImage(uri).observe(viewLifecycleOwner) { (success, imageUrl) ->
+                if (success && imageUrl != null) {
+                    userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to imageUrl)) { updateSuccess ->
+                        if (updateSuccess) {
+                            Toast.makeText(requireContext(), "Profile picture updated successfully.", Toast.LENGTH_SHORT).show()
+                            // Delete the old image if it exists
+                            oldProfilePictureUrl?.let { oldUrl ->
+                                if (oldUrl.isNotEmpty()) {
+                                    userViewModel.deleteProfileImage(oldUrl)
+                                }
                             }
+                        } else {
+                            Toast.makeText(requireContext(), "Failed to update profile picture in Firebase.", Toast.LENGTH_SHORT).show()
                         }
                     }
-
-                    override fun onError(requestId: String?, error: ErrorInfo) {
-                        Toast.makeText(requireContext(), "Failed to upload new profile picture: ${error.description}", Toast.LENGTH_SHORT).show()
-                    }
-
-                    override fun onReschedule(requestId: String?, error: ErrorInfo) {}
-
-                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                        val progress = (bytes.toDouble() / totalBytes.toDouble() * 100).toInt()
-                        Log.d("UploadProgress", "Progress: $progress%")
-                    }
-                }).dispatch()
-        }
-    }
-
-    private fun deleteCurrentProfilePicture() {
-        userViewModel.fetchUserDetails(userViewModel.getCurrentUser()?.uid ?: return) { userDetails ->
-            val profilePictureUrl = userDetails["profilePictureUrl"] as? String ?: return@fetchUserDetails
-            val userId = userViewModel.getCurrentUser()?.uid ?: return@fetchUserDetails
-
-            userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to "")) { success ->
-                if (success) {
-                    Toast.makeText(requireContext(), "Profile picture deleted successfully.", Toast.LENGTH_SHORT).show()
-                    deleteImageFromCloudinary(profilePictureUrl)
                 } else {
-                    Toast.makeText(requireContext(), "Failed to delete profile picture.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Failed to upload new profile picture.", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
 
-    private fun deleteImageFromCloudinary(imageUrl: String) {
-        val publicId = imageUrl.substringAfterLast("/").substringBeforeLast(".") // Extract the public ID
 
-        val requestBody = FormBody.Builder()
-            .add("public_id", publicId)
-            .add("invalidate", "true")
-            .build()
 
-        val request = Request.Builder()
-            .url("https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy")
-            .post(requestBody)
-            .addHeader(
-                "Authorization",
-                "Basic ${Base64.encodeToString("$API_KEY:$API_SECRET".toByteArray(), Base64.NO_WRAP)}"
-            )
-            .build()
 
-        val client = OkHttpClient()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: okhttp3.Call, e: IOException) {
-                Log.e("Cloudinary", "Failed to delete image: ${e.message}")
-            }
-
-            override fun onResponse(call: okhttp3.Call, response: Response) {
-                if (response.isSuccessful) {
-                    Log.d("Cloudinary", "Successfully deleted image: $publicId")
-                } else {
-                    Log.e("Cloudinary", "Failed to delete image: ${response.message}")
-                }
-            }
-        })
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

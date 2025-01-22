@@ -10,9 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.UserViewModel
 import com.example.reviewr.databinding.RegisterFragmentBinding
@@ -26,9 +23,15 @@ class RegisterFragment : Fragment() {
     private var profilePictureUrl: String? = null
     private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            uploadImageToCloudinary(it) { url ->
-                profilePictureUrl = url
-                Toast.makeText(requireContext(), "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
+            // Use the ViewModel's image upload method
+            userViewModel.uploadProfileImage(it).observe(viewLifecycleOwner) { status ->
+                val (success, imageUrl) = status
+                if (success) {
+                    profilePictureUrl = imageUrl
+                    Toast.makeText(requireContext(), "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "Image upload failed: $imageUrl", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }
@@ -53,30 +56,6 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun uploadImageToCloudinary(uri: Uri, callback: (String) -> Unit) {
-        try {
-            MediaManager.get().upload(uri)
-                .option("folder", "profile_pictures/")
-                .callback(object : UploadCallback {
-                    override fun onStart(requestId: String?) {
-                        Toast.makeText(requireContext(), "Uploading image...", Toast.LENGTH_SHORT).show()
-                    }
-                    override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
-                        val imageUrl = resultData["secure_url"] as String
-                        callback(imageUrl)
-                    }
-                    override fun onError(requestId: String?, error: ErrorInfo) {
-                        Toast.makeText(requireContext(), "Image upload failed: ${error.description}", Toast.LENGTH_SHORT).show()
-                    }
-                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
-                    override fun onReschedule(requestId: String?, error: ErrorInfo) {}
-                }).dispatch()
-        } catch (e: IllegalStateException) {
-            Toast.makeText(requireContext(), "MediaManager not initialized. Please restart the app.", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
     private fun registerUser() {
         val username = binding.usernameInput.text.toString().trim()
         val firstName = binding.firstNameInput.text.toString().trim()
@@ -89,6 +68,8 @@ class RegisterFragment : Fragment() {
             Toast.makeText(requireContext(), "All fields are required.", Toast.LENGTH_SHORT).show()
             return
         }
+
+        // Register the user with the data and pass the profile picture URL
         userViewModel.register(email, password, username, firstName, lastName, age)
             .observe(viewLifecycleOwner) { result ->
                 when (result) {
@@ -113,7 +94,6 @@ class RegisterFragment : Fragment() {
                     }
                 }
             }
-
     }
 
     override fun onDestroyView() {

@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -26,11 +27,12 @@ class WriteReviewFragment : Fragment() {
 
     private var latitude: Float = 0f
     private var longitude: Float = 0f
+
     private var reviewImageUrl: String? = null // URL of the uploaded image
 
-    private val imagePicker = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.GetContent()) { uri ->
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
-            uploadImageToCloudinary(it)
+            reviewViewModel.uploadReviewImage(it)
         }
     }
 
@@ -63,7 +65,21 @@ class WriteReviewFragment : Fragment() {
 
         // Upload image button
         binding.uploadImageButton.setOnClickListener {
-            imagePicker.launch("image/*") // Open gallery to pick an image
+            imagePicker.launch("image/*")
+        }
+
+        reviewViewModel.imageUploadStatus.observe(viewLifecycleOwner) { (success, imageUrl) ->
+            if (success && imageUrl != null) {
+                reviewImageUrl = imageUrl
+                binding.reviewImageView.visibility = View.VISIBLE
+                Glide.with(requireContext())
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .into(binding.reviewImageView)
+                Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Failed to upload image.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         // Post review button
@@ -77,37 +93,7 @@ class WriteReviewFragment : Fragment() {
         }
     }
 
-    private fun uploadImageToCloudinary(uri: Uri) {
-        MediaManager.get().upload(uri)
-            .option("folder", "review_images/")
-            .callback(object : UploadCallback {
-                override fun onStart(requestId: String?) {
-                    Toast.makeText(requireContext(), "Uploading image...", Toast.LENGTH_SHORT).show()
-                }
 
-                override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
-                    reviewImageUrl = resultData["secure_url"] as? String
-                    reviewImageUrl?.let {
-                        binding.reviewImageView.visibility = View.VISIBLE
-                        Glide.with(requireContext())
-                            .load(it)
-                            .placeholder(R.drawable.ic_launcher_foreground)
-                            .into(binding.reviewImageView)
-                        Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onError(requestId: String?, error: ErrorInfo) {
-                    Toast.makeText(requireContext(), "Failed to upload image: ${error.description}", Toast.LENGTH_SHORT).show()
-                }
-
-                override fun onReschedule(requestId: String?, error: ErrorInfo) {}
-
-                override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
-                    // Optional: Track upload progress
-                }
-            }).dispatch()
-    }
 
     private fun postReview() {
         val title = binding.reviewTitle.text.toString()
