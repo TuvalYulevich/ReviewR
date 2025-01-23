@@ -55,6 +55,7 @@ class EditPersonalDetailsFragment : Fragment() {
             binding.lastNameInput.setText(userDetails["lastName"] as? String ?: "")
             binding.ageInput.setText(userDetails["age"] as? String ?: "")
             binding.emailInput.setText(userDetails["email"] as? String ?: "")
+            binding.passwordInput.setText(userDetails["password"] as? String ?: "")
         }
 
         // Save personal details
@@ -80,7 +81,8 @@ class EditPersonalDetailsFragment : Fragment() {
                             lastName = updatedData["lastName"] as String,
                             email = userDetails["email"] as String,
                             age = updatedData["age"] as String,
-                            profileImageUrl = userDetails["profilePictureUrl"] as? String ?: ""
+                            profileImageUrl = userDetails["profilePictureUrl"] as? String ?: "",
+                            password = userDetails["password"] as String // Include password
                         )
                         userViewModel.updateUserInRoom(updatedUser)
                     }
@@ -111,7 +113,8 @@ class EditPersonalDetailsFragment : Fragment() {
                                     lastName = userDetails["lastName"] as String,
                                     email = email, // Updated email
                                     age = userDetails["age"] as String,
-                                    profileImageUrl = userDetails["profilePictureUrl"] as? String ?: ""
+                                    profileImageUrl = userDetails["profilePictureUrl"] as? String ?: "",
+                                    password = userDetails["password"] as String // Include password
                                 )
                                 userViewModel.updateUserInRoom(updatedUser)
                             }
@@ -130,9 +133,21 @@ class EditPersonalDetailsFragment : Fragment() {
                 Toast.makeText(requireContext(), "Both current and new passwords are required.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
             userViewModel.updatePassword(currentPassword, newPassword) { success, errorMessage ->
                 if (success) {
+                    userViewModel.fetchUserDetails(userId) { userDetails ->
+                        val updatedUser = UserEntity(
+                            userId = userId,
+                            username = userDetails["username"] as String,
+                            firstName = userDetails["firstName"] as String,
+                            lastName = userDetails["lastName"] as String,
+                            email = userDetails["email"] as String,
+                            age = userDetails["age"] as String,
+                            profileImageUrl = userDetails["profilePictureUrl"] as? String ?: "",
+                            password = newPassword // Update password
+                        )
+                        userViewModel.updateUserInRoom(updatedUser)
+                    }
                     Toast.makeText(requireContext(), "Password updated successfully.", Toast.LENGTH_SHORT).show()
                 } else {
                     Toast.makeText(requireContext(), "Failed to update password: $errorMessage", Toast.LENGTH_SHORT).show()
@@ -159,6 +174,7 @@ class EditPersonalDetailsFragment : Fragment() {
                             lastName = userDetails["lastName"] as String,
                             email = userDetails["email"] as String,
                             age = userDetails["age"] as String,
+                            password = userDetails["password"] as String,
                             profileImageUrl = "" // Updated profile picture URL
                         )
                         userViewModel.updateUserInRoom(updatedUser)
@@ -198,6 +214,7 @@ class EditPersonalDetailsFragment : Fragment() {
                                 lastName = userDetails["lastName"] as String,
                                 email = userDetails["email"] as String,
                                 age = userDetails["age"] as String,
+                                password = userDetails["password"] as String,
                                 profileImageUrl = imageUrl // Updated profile picture URL
                             )
                             userViewModel.updateUserInRoom(updatedUser)

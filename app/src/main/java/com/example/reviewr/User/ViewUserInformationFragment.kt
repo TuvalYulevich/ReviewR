@@ -10,13 +10,14 @@ import androidx.navigation.fragment.findNavController
 import com.example.reviewr.R
 import com.example.reviewr.databinding.ViewUserInformationFragmentBinding
 import com.example.reviewr.Utils.NetworkUtils
-
+import com.example.reviewr.ViewModel.UserViewModel
 
 
 class ViewUserInformationFragment : Fragment() {
 
     private var _binding: ViewUserInformationFragmentBinding? = null
     private val binding get() = _binding!!
+    private lateinit var userViewModel: UserViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
