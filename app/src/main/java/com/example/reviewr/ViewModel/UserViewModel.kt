@@ -47,6 +47,17 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
         data class Failure(val message: String?) : RegistrationResult()
     }
 
+    fun updateUserInRoom(user: UserEntity) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                userDao.insertUser(user)
+                Log.d("UserViewModel", "User updated in Room successfully: $user")
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Failed to update user in Room: ${e.message}")
+            }
+        }
+    }
+
 
     fun uploadProfileImage(uri: Uri): LiveData<Pair<Boolean, String?>> {
         val uploadStatus = MutableLiveData<Pair<Boolean, String?>>()
