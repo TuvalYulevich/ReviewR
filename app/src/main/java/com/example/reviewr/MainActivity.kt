@@ -7,7 +7,7 @@ import com.example.reviewr.Data.AppDatabase
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // Ensure this references the updated layout
+        setContentView(R.layout.activity_main) // MainActivity initiation
 
         try {
             val database = AppDatabase.getInstance(applicationContext)

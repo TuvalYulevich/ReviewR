@@ -1,0 +1,30 @@
+Notes on the app -
+
+Q: Why the comments and reviews count for the user is not being updated when the app is offline?
+A: Because this data relays on real-time and live-data only.
+----------------------------------------------------------------------------------------------------------
+Q: Why the users is not being saved in Room after registration?
+A: Because you cannot log into the app when you are offline, so there is no need to save unnecessary data.
+----------------------------------------------------------------------------------------------------------
+Q: Why changes that are made in Firebase do not change directly in Room?
+A: These are two different systems, they synchroinse in very specific keypoints in the project (If a change is made from Firebase, it will be updated in the Room as soon the user will see the change in the app itself).
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+
+----------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+

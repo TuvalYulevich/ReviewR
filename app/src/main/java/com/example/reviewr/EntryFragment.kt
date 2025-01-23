@@ -11,14 +11,12 @@ import androidx.navigation.fragment.findNavController
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.UserViewModel
 
+// Interface code for the "Remember Me" feature
 class EntryFragment : Fragment() {
 
     private lateinit var userViewModel: UserViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.entry_fragment, container, false)
     }
 
