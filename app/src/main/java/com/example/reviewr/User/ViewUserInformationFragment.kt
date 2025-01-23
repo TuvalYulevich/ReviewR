@@ -10,19 +10,14 @@ import androidx.navigation.fragment.findNavController
 import com.example.reviewr.R
 import com.example.reviewr.databinding.ViewUserInformationFragmentBinding
 import com.example.reviewr.Utils.NetworkUtils
-import com.example.reviewr.ViewModel.UserViewModel
 
 
 class ViewUserInformationFragment : Fragment() {
 
     private var _binding: ViewUserInformationFragmentBinding? = null
     private val binding get() = _binding!!
-    private lateinit var userViewModel: UserViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ViewUserInformationFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -30,11 +25,12 @@ class ViewUserInformationFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Navigation actions for buttons
+        // Navigation to view user data
         binding.viewUserDataButton.setOnClickListener {
             findNavController().navigate(R.id.action_viewUserInformationFragment_to_viewUserDataFragment)
         }
 
+        // Navigation to edit user personal data (Possible only if the app is connected to the internet)
         binding.editPersonalDetailsButton.setOnClickListener {
             if(NetworkUtils.isOnline(requireContext())) {
                 findNavController().navigate(R.id.action_viewUserInformationFragment_to_editPersonalDetailsFragment)
@@ -42,8 +38,9 @@ class ViewUserInformationFragment : Fragment() {
             else {
                 Toast.makeText(requireContext(), "You cannot edit when offline.", Toast.LENGTH_SHORT).show()
             }
-            }
+        }
 
+        // Navigation to edit user reviews (Possible only if the app is connected to the internet)
         binding.editMyReviewsButton.setOnClickListener {
             if(NetworkUtils.isOnline(requireContext())) {
                 findNavController().navigate(R.id.action_viewUserInformationFragment_to_editMyReviewsFragment)
@@ -53,6 +50,7 @@ class ViewUserInformationFragment : Fragment() {
             }
         }
 
+        // Navigation to edit user comments (Possible only if the app is connected to the internet)
         binding.editMyCommentsButton.setOnClickListener {
             if(NetworkUtils.isOnline(requireContext())) {
                 findNavController().navigate(R.id.action_viewUserInformationFragment_to_editMyCommentsFragment)
@@ -62,6 +60,7 @@ class ViewUserInformationFragment : Fragment() {
             }
         }
 
+        // Navigate back main user screen
         binding.goBackButton.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }

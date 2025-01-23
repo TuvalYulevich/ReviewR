@@ -48,7 +48,6 @@ class SearchResultsFragment : Fragment() {
             recyclerView.adapter = adapter
         }
 
-
         // Go back functionality
         goBackButton.setOnClickListener {
             findNavController().navigateUp()

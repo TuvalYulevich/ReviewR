@@ -31,10 +31,7 @@ class ViewReviewFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         binding = ViewReviewFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -73,18 +70,19 @@ class ViewReviewFragment : Fragment() {
             updateCommentsUI(comments)
         }
 
+        // Fetch existing comments for the review
         postId?.let {
-            reviewViewModel.fetchComments(it) // Fetch existing comments for the review
+            reviewViewModel.fetchComments(it)
         }
     }
 
+    // Show the review details interface
     private fun displayReviewDetails(review: Map<String, Any>?) {
         if (review != null) {
             binding.reviewTitle.text = review["title"] as? String ?: "No Title"
             binding.reviewDescription.text = review["description"] as? String ?: "No Description"
             binding.reviewStatus.text = "Status: ${review["status"] as? String ?: "Unknown"}"
             binding.reviewCategory.text = "Category: ${review["category"] as? String ?: "Unknown"}"
-
 
             // Load the profile picture using Glide
             val imageUrl  = review["imageUrl"] as? String
@@ -98,9 +96,11 @@ class ViewReviewFragment : Fragment() {
                 binding.reviewImageView.setImageResource(R.drawable.ic_launcher_foreground)
             }
 
+            // Timestamp for when the review (Post) was created
             val timestamp = review["timestamp"] as? com.google.firebase.Timestamp
             binding.reviewTime.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
 
+            // Timestamp for when the review (Post) was last edited
             val lastEdited = review["lastEdited"] as? com.google.firebase.Timestamp
             if (lastEdited != null) {
                 binding.reviewEditedTime.text = "Edited: ${lastEdited.toDate()}"
@@ -111,7 +111,7 @@ class ViewReviewFragment : Fragment() {
         }
     }
 
-
+    // Show comments live when commented on a review interface
     private fun showCommentPopup() {
         val builder = AlertDialog.Builder(requireContext())
         val popupBinding = CommentPopupBinding.inflate(layoutInflater)
@@ -124,7 +124,6 @@ class ViewReviewFragment : Fragment() {
             val title = popupBinding.commentTitleInput.text.toString()
             val description = popupBinding.commentDescriptionInput.text.toString()
             val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
-
             if (title.isNotEmpty() && description.isNotEmpty()) {
                 // Fetch the username of the comment author using ReviewViewModel
                 reviewViewModel.fetchReviewAuthor(currentUserId) { username ->
@@ -136,7 +135,6 @@ class ViewReviewFragment : Fragment() {
                         "username" to username, // Use the fetched username
                         "timestamp" to com.google.firebase.Timestamp.now()
                     )
-
                     // Post the comment using ReviewViewModel
                     reviewViewModel.postComment(postId!!, comment) { success ->
                         if (success) {
@@ -156,6 +154,7 @@ class ViewReviewFragment : Fragment() {
         }
     }
 
+    // Updating comments UI if anything was done with them
     private fun updateCommentsUI(comments: List<Map<String, Any>>) {
         if (comments.isEmpty()) {
             binding.commentsRecyclerView.visibility = View.GONE
@@ -163,7 +162,6 @@ class ViewReviewFragment : Fragment() {
         } else {
             binding.commentsRecyclerView.visibility = View.VISIBLE
             binding.noCommentsText.visibility = View.GONE
-
             val adapter = CommentAdapter(comments)
             binding.commentsRecyclerView.adapter = adapter
             adapter.notifyDataSetChanged() // Ensure the RecyclerView refreshes

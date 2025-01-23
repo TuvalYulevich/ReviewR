@@ -1,6 +1,5 @@
 package com.example.reviewr.User
 
-
 import com.bumptech.glide.Glide
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,10 +17,7 @@ class ViewUserDataFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var userViewModel: UserViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = ViewUserDataFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -31,7 +27,7 @@ class ViewUserDataFragment : Fragment() {
 
         // Initialize UserViewModel
         userViewModel = ViewModelProvider(requireActivity())[UserViewModel::class.java]
-
+        // Getting the userId
         val userId = userViewModel.getCurrentUser()?.uid ?: return
 
         // Fetch personal details, including the profile picture
@@ -42,7 +38,7 @@ class ViewUserDataFragment : Fragment() {
             binding.emailText.text = "Email: ${userDetails["email"] ?: "N/A"}"
             binding.ageText.text = "Age: ${userDetails["age"] ?: "N/A"}"
 
-            // Load the profile picture using Glide
+            // Load the profile picture to the UI using Glide
             val profilePictureUrl = userDetails["profilePictureUrl"] as? String
             if (!profilePictureUrl.isNullOrEmpty()) {
                 Glide.with(requireContext())
@@ -64,7 +60,7 @@ class ViewUserDataFragment : Fragment() {
             binding.commentCountText.text = "Comments: $count"
         }
 
-        // Go back button
+        // Go Back button
         binding.goBackButton.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }

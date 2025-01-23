@@ -1,6 +1,5 @@
 package com.example.reviewr.Reviews
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,9 +10,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.WriteReviewFragmentBinding
@@ -44,10 +40,7 @@ class WriteReviewFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = WriteReviewFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -94,7 +87,7 @@ class WriteReviewFragment : Fragment() {
     }
 
 
-
+    // Post review function interface
     private fun postReview() {
         val title = binding.reviewTitle.text.toString()
         val status = when (binding.reviewStatusGroup.checkedRadioButtonId) {
@@ -109,7 +102,6 @@ class WriteReviewFragment : Fragment() {
             Toast.makeText(requireContext(), "Title and description are required.", Toast.LENGTH_SHORT).show()
             return
         }
-
         // Create a review object
         val review: Map<String, Any> = mapOf(
             "userId" to FirebaseAuth.getInstance().currentUser?.uid.orEmpty(),
@@ -124,11 +116,11 @@ class WriteReviewFragment : Fragment() {
             "imageUrl" to (reviewImageUrl ?: ""), // Include image URL if available
             "timestamp" to com.google.firebase.Timestamp.now()
         )
-
         // Post review using ViewModel
         reviewViewModel.postReview(review)
     }
 
+    // Check is the review was posted to Firebase
     private fun handlePostReviewResult(result: Boolean?) {
         when (result) {
             true -> {
