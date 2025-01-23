@@ -85,36 +85,19 @@ class ViewReviewFragment : Fragment() {
             binding.reviewStatus.text = "Status: ${review["status"] as? String ?: "Unknown"}"
             binding.reviewCategory.text = "Category: ${review["category"] as? String ?: "Unknown"}"
 
-            // Fetch and display the username using the ViewModel
-            val userId = review["userId"] as? String
-            if (userId != null) {
-                reviewViewModel.fetchReviewAuthor(userId) { username ->
-                    binding.reviewAuthor.text = "By: $username"
-                }
-            } else {
-                binding.reviewAuthor.text = "By: Unknown"
-            }
-
-            // Format and display the timestamp
             val timestamp = review["timestamp"] as? com.google.firebase.Timestamp
-            val formattedDate = timestamp?.toDate()?.toString() ?: "Unknown Time"
-            binding.reviewTime.text = formattedDate
+            binding.reviewTime.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
 
-            // Load the review image if available
-            val imageUrl = review["imageUrl"] as? String
-            if (!imageUrl.isNullOrEmpty()) {
-                binding.reviewImageView.visibility = View.VISIBLE
-                Glide.with(requireContext())
-                    .load(imageUrl)
-                    .placeholder(R.drawable.ic_launcher_foreground) // Replace with your placeholder
-                    .into(binding.reviewImageView)
+            val lastEdited = review["lastEdited"] as? com.google.firebase.Timestamp
+            if (lastEdited != null) {
+                binding.reviewEditedTime.text = "Edited: ${lastEdited.toDate()}"
+                binding.reviewEditedTime.visibility = View.VISIBLE
             } else {
-                binding.reviewImageView.visibility = View.GONE // Hide the ImageView if no image is available
+                binding.reviewEditedTime.visibility = View.GONE
             }
-        } else {
-            Toast.makeText(requireContext(), "Review not found.", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     private fun showCommentPopup() {
         val builder = AlertDialog.Builder(requireContext())

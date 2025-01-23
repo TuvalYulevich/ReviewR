@@ -21,6 +21,7 @@ class CommentAdapter(
         val description: TextView = itemView.findViewById(R.id.commentDescription)
         val username: TextView = itemView.findViewById(R.id.commentUsername)
         val time: TextView = itemView.findViewById(R.id.commentTime)
+        val editedTime: TextView = itemView.findViewById(R.id.commentEditedTime) // Add this line
         val editButton: Button? = itemView.findViewById(R.id.commentEditButton)
         val deleteButton: Button? = itemView.findViewById(R.id.commentDeleteButton)
     }
@@ -38,7 +39,15 @@ class CommentAdapter(
         holder.description.text = comment["description"] as? String ?: "No Description"
         holder.username.text = comment["username"] as? String ?: "Anonymous"
         val timestamp = comment["timestamp"] as? com.google.firebase.Timestamp
-        holder.time.text = timestamp?.toDate()?.toString() ?: "Unknown Time"
+        holder.time.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
+
+        val lastEdited = comment["lastEdited"] as? com.google.firebase.Timestamp
+        if (lastEdited != null) {
+            holder.editedTime.text = "Edited: ${lastEdited.toDate()}"
+            holder.editedTime.visibility = View.VISIBLE
+        } else {
+            holder.editedTime.visibility = View.GONE
+        }
 
         // Handle comment click
         holder.itemView.setOnClickListener {

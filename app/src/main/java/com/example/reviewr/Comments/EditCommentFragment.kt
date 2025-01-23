@@ -49,20 +49,13 @@ class EditCommentFragment : Fragment() {
 
         // Save button logic
         binding.saveButton.setOnClickListener {
-            val updatedTitle = binding.commentTitleInput.text.toString().trim()
-            val updatedDescription = binding.commentDescriptionInput.text.toString().trim()
-
-            if (updatedTitle.isEmpty() || updatedDescription.isEmpty()) {
-                Toast.makeText(requireContext(), "Title and description cannot be empty.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
             val updatedComment = mapOf(
-                "title" to updatedTitle,
-                "description" to updatedDescription
+                "title" to binding.commentTitleInput.text.toString().trim(),
+                "description" to binding.commentDescriptionInput.text.toString().trim(),
+                "lastEdited" to com.google.firebase.Timestamp.now() // Add the last edited timestamp
             )
 
-            commentViewModel.updateComment(commentId, updatedComment) { success ->
+            commentViewModel.updateComment(args.commentId, updatedComment) { success ->
                 if (success) {
                     Toast.makeText(requireContext(), "Comment updated successfully.", Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
@@ -71,7 +64,6 @@ class EditCommentFragment : Fragment() {
                 }
             }
         }
-
         // Cancel button logic
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
