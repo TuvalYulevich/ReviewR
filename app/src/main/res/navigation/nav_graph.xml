@@ -180,6 +180,13 @@
         <action
             android:id="@+id/action_editMyCommentsFragment_to_editCommentFragment"
             app:destination="@id/editCommentFragment" />
+        <action
+            android:id="@+id/action_editMyCommentsFragment_to_viewReviewFragment"
+            app:destination="@id/viewReviewFragment">
+            <argument
+                android:name="postId"
+                app:argType="string" />
+        </action>
     </fragment>
 
     <!-- Edit A Comment  Fragment -->
