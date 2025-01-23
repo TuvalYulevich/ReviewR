@@ -16,6 +16,7 @@ import com.example.reviewr.Data.AppDatabase
 import com.example.reviewr.Data.UserEntity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -247,9 +248,9 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                                         lastName = document.getString("lastName") ?: "Unknown",
                                         email = document.getString("email") ?: email,
                                         age = document.getString("age") ?: "Unknown",
-                                        profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown"
+                                        profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown",
+                                        password = document.getString("password") ?: password
                                     )
-
                                     viewModelScope.launch(Dispatchers.IO) {
                                         try {
                                             Log.d("UserViewModel", "Inserting user into Room: $userEntity")
@@ -280,17 +281,18 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
 
 
     fun logout() {
-        val currentUserId = auth.currentUser?.uid
-        CoroutineScope(Dispatchers.IO).launch {
-            if (currentUserId != null) {
-                userDao.deleteCurrentUser(currentUserId)
-            } else {
-                Log.w("Logout", "No userId found; skipping Room deletion")
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                userDao.deleteAllUsers() // Clear the Room database
+                Log.d("UserViewModel", "All users deleted from Room database.")
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Failed to delete all users from Room: ${e.message}")
             }
         }
-
-        auth.signOut()
+        auth.signOut() // Sign out the user from Firebase Authentication
+        Log.d("UserViewModel", "User signed out.")
     }
+
 
 
     fun fetchUserDetails(userId: String, callback: (Map<String, Any>) -> Unit) {
@@ -310,7 +312,8 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                         lastName = userData["lastName"] as? String ?: "Unknown",
                         email = userData["email"] as? String ?: "Unknown",
                         age = userData["age"] as? String ?: "Unknown",
-                        profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown"
+                        profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown",
+                        password = userData["password"] as? String ?: "" // Fetch password
                     )
                     viewModelScope.launch(Dispatchers.IO) {
                         try {
@@ -341,7 +344,8 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                                 "lastName" to cachedUser.lastName,
                                 "email" to cachedUser.email,
                                 "age" to cachedUser.age,
-                                "profileImageUrl" to (cachedUser.profileImageUrl ?: "Unknown")
+                                "profileImageUrl" to (cachedUser.profileImageUrl ?: "Unknown"),
+                                "password" to cachedUser.password
                             )
                             callback(cachedData)
                         } else {
@@ -421,10 +425,22 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
         user?.reauthenticate(credential)
             ?.addOnCompleteListener { authTask ->
                 if (authTask.isSuccessful) {
-                    // Proceed with password update
+                    // Proceed with password update in Firebase Authentication
                     user.updatePassword(newPassword)
                         .addOnCompleteListener { updateTask ->
                             if (updateTask.isSuccessful) {
+                                val userId = user.uid
+                                // Save the new password to Firestore
+                                firestore.collection("users").document(userId)
+                                    .update("password", newPassword)
+                                    .addOnSuccessListener {
+                                        Log.d("UserViewModel", "Password updated in Firestore successfully.")
+                                        // Save the new password to Room
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.e("UserViewModel", "Failed to update password in Firestore: ${e.message}")
+                                    }
+
                                 callback(true, null)
                             } else {
                                 callback(false, updateTask.exception?.message)
@@ -435,6 +451,7 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                 }
             }
     }
+
 
 
 
@@ -469,6 +486,46 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                     document.reference.update("username", updatedUsername)
                 }
             }
+    }
+
+    fun syncFirestoreToRoom() {
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            Log.w("FirestoreSync", "No user is logged in. Skipping sync.")
+            return
+        }
+        val userId = currentUser.uid
+        firestore.collection("users").document(userId).addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.e("FirestoreSync", "Failed to listen for user data changes.", e)
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                val userData = snapshot.data
+                if (userData != null) {
+                    val userEntity = UserEntity(
+                        userId = userData["userId"] as? String ?: userId,
+                        username = userData["username"] as? String ?: "Unknown",
+                        firstName = userData["firstName"] as? String ?: "Unknown",
+                        lastName = userData["lastName"] as? String ?: "Unknown",
+                        email = userData["email"] as? String ?: "Unknown",
+                        age = userData["age"] as? String ?: "Unknown",
+                        profileImageUrl = userData["profilePictureUrl"] as? String ?: "",
+                        password = userData["password"] as? String ?: "" // Handle missing password
+                    )
+                    viewModelScope.launch(Dispatchers.IO) {
+                        try {
+                            userDao.insertUser(userEntity)
+                            Log.d("FirestoreSync", "Logged-in user data synced to Room: $userEntity")
+                        } catch (ex: Exception) {
+                            Log.e("FirestoreSync", "Error syncing user data to Room: ${ex.message}")
+                        }
+                    }
+                }
+            } else {
+                Log.w("FirestoreSync", "User document does not exist or has been deleted.")
+            }
+        }
     }
 
 

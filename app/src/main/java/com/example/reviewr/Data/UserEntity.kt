@@ -12,7 +12,8 @@ data class UserEntity(
     @ColumnInfo(name = "lastName") val lastName: String,
     @ColumnInfo(name = "email") val email: String,
     @ColumnInfo(name = "age") val age: String,
-    @ColumnInfo(name = "profileImageUrl")  val profileImageUrl: String?
+    @ColumnInfo(name = "profileImageUrl")  val profileImageUrl: String?,
+    @ColumnInfo(name = "password") val password: String //
 )
 
 

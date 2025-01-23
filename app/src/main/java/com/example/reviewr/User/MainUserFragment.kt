@@ -61,7 +61,7 @@ class MainUserFragment : Fragment() {
         // Initialize ViewModel
         reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
 
-// Set up the search button click listener
+        // Set up the search button click listener
         binding.searchReviewsButton.setOnClickListener {
             if (NetworkUtils.isOnline(requireContext())){
             val dialog = SearchDialogFragment { filters ->
@@ -89,9 +89,6 @@ class MainUserFragment : Fragment() {
                 Toast.makeText(requireContext(), "You cannot search when offline.", Toast.LENGTH_SHORT).show()
             }
         }
-
-
-
 
 
         binding.viewMyInfoButton.setOnClickListener {

@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [UserEntity::class], version = 2, exportSchema = false)
+@Database(entities = [UserEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
 
@@ -16,9 +16,17 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        // Migration from version 1 to version 2: Add profileImageUrl column
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE users ADD COLUMN profileImageUrl TEXT")
+            }
+        }
+
+        // Migration from version 2 to version 3: Add password column
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE users ADD COLUMN password TEXT NOT NULL DEFAULT ''")
             }
         }
 
@@ -31,7 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "app_database"
                     )
-                        .addMigrations(MIGRATION_1_2) // Use migration
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3) // Add all migrations
                         .build()
                     INSTANCE = instance
                     Log.d("AppDatabase", "Database initialized successfully")
@@ -44,3 +52,4 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
+
