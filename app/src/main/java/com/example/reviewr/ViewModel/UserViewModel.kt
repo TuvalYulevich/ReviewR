@@ -101,57 +101,45 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
 
 
     fun deleteProfileImage(imageUrl: String, callback: ((Boolean) -> Unit)? = null) {
-        // Replace with your Cloudinary credentials
         val CLOUD_NAME = "dm8sulfig"
         val API_KEY = "129181168733979"
         val API_SECRET = "uNaILxRogPyZ_FTQtnOWEQ-Tq5Y"
 
         // Extract the public ID from the URL
         val publicId = "profile_pictures/" + imageUrl.substringAfterLast("/").substringBeforeLast(".")
-        Log.d("Cloudinary", "Public ID: $publicId")
-
-        // Generate the timestamp (current time in seconds)
         val timestamp = (System.currentTimeMillis() / 1000).toString()
-        Log.d("Cloudinary", "Timestamp: $timestamp")
 
-        // Generate the signature string
-        val signatureString = "public_id=$publicId&timestamp=$timestamp$API_SECRET"
+        // Generate the correct signature string (including invalidate=true)
+        val signatureString = "invalidate=true&public_id=$publicId&timestamp=$timestamp$API_SECRET"
         val signature = MessageDigest.getInstance("SHA-1")
             .digest(signatureString.toByteArray())
-            .joinToString("") { "%02x".format(it) } // Generate SHA-1 signature
-        Log.d("Cloudinary", "Signature String: $signatureString")
-        Log.d("Cloudinary", "Signature: $signature")
+            .joinToString("") { "%02x".format(it) }
 
-        // Prepare the API URL and request
-        val requestUrl = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy"
-        Log.d("Cloudinary", "Request URL: $requestUrl")
-
+        // Prepare the request body (include api_key)
         val requestBody = FormBody.Builder()
             .add("public_id", publicId)
             .add("timestamp", timestamp)
             .add("signature", signature)
             .add("invalidate", "true")
+            .add("api_key", API_KEY) // Add api_key explicitly
             .build()
 
-        // Optional: Authorization header
-        val authHeader = "Basic ${Base64.encodeToString("$API_KEY:$API_SECRET".toByteArray(), Base64.NO_WRAP)}"
-        Log.d("Cloudinary", "Authorization Header: $authHeader")
+        val requestUrl = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy"
 
         val request = Request.Builder()
             .url(requestUrl)
             .post(requestBody)
-            .addHeader("Authorization", authHeader) // Optional, might not be needed
             .build()
 
-        // Make the HTTP request
+        // Send the request
         val client = OkHttpClient()
-        client.newCall(request).enqueue(object : okhttp3.Callback {
+        client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: okhttp3.Call, e: IOException) {
                 Log.e("Cloudinary", "Failed to delete image: ${e.message}")
                 callback?.invoke(false)
             }
 
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+            override fun onResponse(call: okhttp3.Call, response: Response) {
                 val responseBody = response.body?.string() ?: "No response body"
                 if (response.isSuccessful) {
                     Log.d("Cloudinary", "Successfully deleted image: $publicId, Response: $responseBody")
@@ -163,6 +151,8 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
             }
         })
     }
+
+
 
 
 
