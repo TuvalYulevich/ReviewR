@@ -12,10 +12,14 @@ import com.cloudinary.android.callback.UploadCallback
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import okhttp3.Callback
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import java.io.IOException
+import java.security.MessageDigest
+
 
 class ReviewViewModel : ViewModel() {
 
@@ -56,56 +60,66 @@ class ReviewViewModel : ViewModel() {
                 override fun onStart(requestId: String?) {
                     // Optionally indicate the upload started
                 }
-
                 override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
                     val imageUrl = resultData["secure_url"] as? String
                     imageUploadStatus.postValue(Pair(true, imageUrl))
                 }
-
                 override fun onError(requestId: String?, error: ErrorInfo) {
                     imageUploadStatus.postValue(Pair(false, null))
                 }
-
                 override fun onReschedule(requestId: String?, error: ErrorInfo) {}
-
                 override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
             }).dispatch()
     }
 
 
 
-    fun deleteReviewImage(imageUrl: String, callback: (Boolean) -> Unit) {
+    fun deleteReviewImage(imageUrl: String, callback: ((Boolean) -> Unit)?=null) {
+
+        val CLOUD_NAME = "dm8sulfig"
+        val API_KEY = "129181168733979"
+        val API_SECRET = "uNaILxRogPyZ_FTQtnOWEQ-Tq5Y"
+
+
         val publicId = "review_images/" + imageUrl.substringAfterLast("/").substringBeforeLast(".")
-        Log.d("ReviewViewModel", "Public ID for deletion: $publicId")
+        val timestamp = (System.currentTimeMillis() / 1000).toString()
+
+        // Generate the correct signature string (including invalidate=true)
+        val signatureString = "invalidate=true&public_id=$publicId&timestamp=$timestamp$API_SECRET"
+        val signature = MessageDigest.getInstance("SHA-1")
+            .digest(signatureString.toByteArray())
+            .joinToString("") { "%02x".format(it) }
+
+        // Prepare the request body (include api_key)
         val requestBody = FormBody.Builder()
             .add("public_id", publicId)
+            .add("timestamp", timestamp)
+            .add("signature", signature)
             .add("invalidate", "true")
+            .add("api_key", API_KEY) // Add api_key explicitly
             .build()
+
+        val requestUrl = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy"
+
         val request = Request.Builder()
-            .url("https://api.cloudinary.com/v1_1/dm8sulfig/image/destroy")
+            .url(requestUrl)
             .post(requestBody)
-            .addHeader(
-                "Authorization",
-                "Basic ${
-                    Base64.encodeToString(
-                        "129181168733979:uNaILxRogPyZ_FTQtnOWEQ-Tq5Y".toByteArray(),
-                        Base64.NO_WRAP
-                    )
-                }"
-            )
             .build()
-        OkHttpClient().newCall(request).enqueue(object : okhttp3.Callback {
+        // Send the request
+        val client = OkHttpClient()
+        client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: okhttp3.Call, e: IOException) {
-                Log.e("ReviewViewModel", "Failed to delete image: ${e.message}")
-                callback(false)
+                Log.e("Cloudinary", "Failed to delete image: ${e.message}")
+                callback?.invoke(false)
             }
-            override fun onResponse(call: okhttp3.Call, response: okhttp3.Response) {
+            override fun onResponse(call: okhttp3.Call, response: Response) {
+                val responseBody = response.body?.string() ?: "No response body"
                 if (response.isSuccessful) {
-                    Log.d("ReviewViewModel", "Successfully deleted image.")
-                    callback(true)
+                    Log.d("Cloudinary", "Successfully deleted image: $publicId, Response: $responseBody")
+                    callback?.invoke(true)
                 } else {
-                    Log.e("ReviewViewModel", "Failed to delete image: ${response.body?.string()}")
-                    callback(false)
+                    Log.e("Cloudinary", "Failed to delete image: ${response.message}, Response: $responseBody")
+                    callback?.invoke(false)
                 }
             }
         })

@@ -85,6 +85,19 @@ class ViewReviewFragment : Fragment() {
             binding.reviewStatus.text = "Status: ${review["status"] as? String ?: "Unknown"}"
             binding.reviewCategory.text = "Category: ${review["category"] as? String ?: "Unknown"}"
 
+
+            // Load the profile picture using Glide
+            val imageUrl  = review["imageUrl"] as? String
+            if (!imageUrl .isNullOrEmpty()) {
+                Glide.with(requireContext())
+                    .load(imageUrl ) // Load the review image URL
+                    .placeholder(R.drawable.ic_launcher_foreground) // Default image while loading
+                    .into(binding.reviewImageView) // Target ImageView
+            } else {
+                // Show default profile picture if no URL is available
+                binding.reviewImageView.setImageResource(R.drawable.ic_launcher_foreground)
+            }
+
             val timestamp = review["timestamp"] as? com.google.firebase.Timestamp
             binding.reviewTime.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
 

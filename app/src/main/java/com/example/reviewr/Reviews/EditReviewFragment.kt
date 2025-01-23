@@ -131,6 +131,15 @@ class EditReviewFragment : Fragment() {
     }
 
     private fun uploadNewImage(uri: Uri) {
+        currentImageUrl?.let { oldImageUrl ->
+            // Delete the old image from Cloudinary
+            reviewViewModel.deleteReviewImage(oldImageUrl) { deleteSuccess ->
+                if (!deleteSuccess) {
+                    Log.e("EditReviewFragment", "Failed to delete old image from Cloudinary.")
+                }
+            }
+        }
+
         reviewViewModel.uploadReviewImage(uri)
         reviewViewModel.imageUploadStatus.observe(viewLifecycleOwner) { (success, imageUrl) ->
             if (success && imageUrl != null) {
@@ -140,12 +149,22 @@ class EditReviewFragment : Fragment() {
                     .load(imageUrl)
                     .placeholder(R.drawable.ic_launcher_foreground)
                     .into(binding.reviewImageView)
+                // Update the Firebase review document with the new image URL
+                val postId = args.postId
+                val updatedReviewData = mapOf("imageUrl" to imageUrl)
+                reviewViewModel.updateReview(postId, updatedReviewData) { updateSuccess ->
+                    if (!updateSuccess) {
+                        Log.e("EditReviewFragment", "Failed to update review with new image URL.")
+                    }
+                }
+
                 Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Failed to upload image.", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
     private fun deleteCurrentImage() {
         currentImageUrl?.let { imageUrl ->

@@ -62,7 +62,6 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
 
     fun uploadProfileImage(uri: Uri): LiveData<Pair<Boolean, String?>> {
         val uploadStatus = MutableLiveData<Pair<Boolean, String?>>()
-
         try {
             MediaManager.get().upload(uri)
                 .option("folder", "profile_pictures/")
@@ -70,7 +69,6 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                     override fun onStart(requestId: String?) {
                         Log.d("UserViewModel", "Uploading image started...")
                     }
-
                     override fun onSuccess(requestId: String?, resultData: Map<*, *>) {
                         val imageUrl = resultData["secure_url"] as? String
                         if (!imageUrl.isNullOrEmpty()) {
@@ -81,14 +79,11 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                             uploadStatus.postValue(Pair(false, null))
                         }
                     }
-
                     override fun onError(requestId: String?, error: ErrorInfo) {
                         Log.e("UserViewModel", "Image upload failed: ${error.description}")
                         uploadStatus.postValue(Pair(false, error.description))
                     }
-
                     override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {}
-
                     override fun onReschedule(requestId: String?, error: ErrorInfo) {}
                 }).dispatch()
         } catch (e: IllegalStateException) {
