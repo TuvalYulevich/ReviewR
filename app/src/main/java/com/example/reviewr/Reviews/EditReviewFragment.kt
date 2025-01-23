@@ -63,10 +63,10 @@ class EditReviewFragment : Fragment() {
                 "description" to binding.reviewDescriptionInput.text.toString().trim(),
                 "status" to view?.findViewById<RadioButton>(binding.statusRadioGroup.checkedRadioButtonId)?.text.toString(),
                 "category" to binding.categorySpinner.selectedItem.toString(),
-                "imageUrl" to (currentImageUrl ?: "") // Update the image URL
+                "imageUrl" to (currentImageUrl ?: ""),
+                "lastEdited" to com.google.firebase.Timestamp.now() // Add the last edited timestamp
             )
-
-            reviewViewModel.updateReview(postId, updatedReview) { success ->
+            reviewViewModel.updateReview(args.postId, updatedReview) { success ->
                 if (success) {
                     Toast.makeText(requireContext(), "Review updated successfully.", Toast.LENGTH_SHORT).show()
                     findNavController().navigateUp()
@@ -75,6 +75,7 @@ class EditReviewFragment : Fragment() {
                 }
             }
         }
+
 
         // Cancel Button Logic
         binding.cancelButton.setOnClickListener {
