@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
+import com.example.reviewr.Data.UserEntity
 import com.example.reviewr.ViewModel.UserViewModel
 import com.example.reviewr.databinding.EditPersonalDetailsFragmentBinding
 import okhttp3.FormBody
@@ -69,6 +70,20 @@ class EditPersonalDetailsFragment : Fragment() {
                 if (success) {
                     Toast.makeText(requireContext(), "Personal details updated successfully.", Toast.LENGTH_SHORT).show()
                     userViewModel.updateReviewsAndComments(userId, updatedData)
+
+                    // Save to Room database
+                    userViewModel.fetchUserDetails(userId) { userDetails ->
+                        val updatedUser = UserEntity(
+                            userId = userId,
+                            username = updatedData["username"] as String,
+                            firstName = updatedData["firstName"] as String,
+                            lastName = updatedData["lastName"] as String,
+                            email = userDetails["email"] as String,
+                            age = updatedData["age"] as String,
+                            profileImageUrl = userDetails["profilePictureUrl"] as? String ?: ""
+                        )
+                        userViewModel.updateUserInRoom(updatedUser)
+                    }
                 } else {
                     Toast.makeText(requireContext(), "Failed to update personal details.", Toast.LENGTH_SHORT).show()
                 }
@@ -87,6 +102,19 @@ class EditPersonalDetailsFragment : Fragment() {
             userViewModel.updateEmail(email, password) { success, message ->
                 if (success) {
                     Toast.makeText(requireContext(), message ?: "Verification email sent. Please verify the new email.", Toast.LENGTH_SHORT).show()
+                    // Save to Room database
+                            userViewModel.fetchUserDetails(userId) { userDetails ->
+                                val updatedUser = UserEntity(
+                                    userId = userId,
+                                    username = userDetails["username"] as String,
+                                    firstName = userDetails["firstName"] as String,
+                                    lastName = userDetails["lastName"] as String,
+                                    email = email, // Updated email
+                                    age = userDetails["age"] as String,
+                                    profileImageUrl = userDetails["profilePictureUrl"] as? String ?: ""
+                                )
+                                userViewModel.updateUserInRoom(updatedUser)
+                            }
                 } else {
                     Toast.makeText(requireContext(), "Failed to update email: $message", Toast.LENGTH_SHORT).show()
                 }
@@ -124,6 +152,16 @@ class EditPersonalDetailsFragment : Fragment() {
                 userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to "")) { success ->
                     if (success) {
                         Toast.makeText(requireContext(), "Profile picture removed successfully!", Toast.LENGTH_SHORT).show()
+                        val updatedUser = UserEntity(
+                            userId = userId,
+                            username = userDetails["username"] as String,
+                            firstName = userDetails["firstName"] as String,
+                            lastName = userDetails["lastName"] as String,
+                            email = userDetails["email"] as String,
+                            age = userDetails["age"] as String,
+                            profileImageUrl = "" // Updated profile picture URL
+                        )
+                        userViewModel.updateUserInRoom(updatedUser)
                         userViewModel.deleteProfileImage(profilePictureUrl) { deleteSuccess ->
                             if (!deleteSuccess) {
                                 Log.e("EditPersonalDetails", "Failed to delete image from Cloudinary.")
@@ -152,6 +190,17 @@ class EditPersonalDetailsFragment : Fragment() {
                     userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to imageUrl)) { updateSuccess ->
                         if (updateSuccess) {
                             Toast.makeText(requireContext(), "Profile picture updated successfully.", Toast.LENGTH_SHORT).show()
+                            // Save to Room database
+                            val updatedUser = UserEntity(
+                                userId = userId,
+                                username = userDetails["username"] as String,
+                                firstName = userDetails["firstName"] as String,
+                                lastName = userDetails["lastName"] as String,
+                                email = userDetails["email"] as String,
+                                age = userDetails["age"] as String,
+                                profileImageUrl = imageUrl // Updated profile picture URL
+                            )
+                            userViewModel.updateUserInRoom(updatedUser)
                             // Delete the old image if it exists
                             oldProfilePictureUrl?.let { oldUrl ->
                                 if (oldUrl.isNotEmpty()) {
@@ -168,8 +217,6 @@ class EditPersonalDetailsFragment : Fragment() {
             }
         }
     }
-
-
 
 
 
