@@ -48,8 +48,7 @@
         android:layout_height="200dp"
         android:layout_marginTop="16dp"
         android:contentDescription="Review Image"
-        android:scaleType="centerCrop"
-        android:visibility="gone" />
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/reviewEditedTime"
