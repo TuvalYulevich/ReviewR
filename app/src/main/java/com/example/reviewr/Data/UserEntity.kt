@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+// Setting up the user entity
 @Entity(tableName = "users")
 data class UserEntity(
     @PrimaryKey @ColumnInfo(name = "userId") val userId: String,

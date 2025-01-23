@@ -1,7 +1,6 @@
 package com.example.reviewr.ViewModel
 
 import android.net.Uri
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,7 +19,7 @@ import okhttp3.Response
 import java.io.IOException
 import java.security.MessageDigest
 
-
+// Review ViewModel interacts with all of the databases offline and online in the actions regarding to reviews
 class ReviewViewModel : ViewModel() {
 
     private val firestore = FirebaseFirestore.getInstance()
@@ -46,16 +45,12 @@ class ReviewViewModel : ViewModel() {
     val filteredReviews: LiveData<List<Map<String, Any>>> get() = _filteredReviews
 
 
-    fun setFilteredReviews(reviews: List<Map<String, Any>>) {
-        _filteredReviews.value = reviews
-    }
-
-
     var imageUploadStatus = MutableLiveData<Pair<Boolean, String?>>()
 
+    // Upload image for a review method
     fun uploadReviewImage(uri: Uri) {
         MediaManager.get().upload(uri)
-            .option("folder", "review_images/")
+            .option("folder", "review_images/") // Image source in Cloudinary
             .callback(object : UploadCallback {
                 override fun onStart(requestId: String?) {
                     // Optionally indicate the upload started
@@ -73,14 +68,14 @@ class ReviewViewModel : ViewModel() {
     }
 
 
-
+    // Delete review image
     fun deleteReviewImage(imageUrl: String, callback: ((Boolean) -> Unit)?=null) {
-
+        // Verifying API credentials
         val CLOUD_NAME = "dm8sulfig"
         val API_KEY = "129181168733979"
         val API_SECRET = "uNaILxRogPyZ_FTQtnOWEQ-Tq5Y"
 
-
+        // Extract the public ID from the URL
         val publicId = "review_images/" + imageUrl.substringAfterLast("/").substringBeforeLast(".")
         val timestamp = (System.currentTimeMillis() / 1000).toString()
 
@@ -90,22 +85,19 @@ class ReviewViewModel : ViewModel() {
             .digest(signatureString.toByteArray())
             .joinToString("") { "%02x".format(it) }
 
-        // Prepare the request body (include api_key)
+        // Prepare the request body (include api_key [SUPER IMPORTANT])
         val requestBody = FormBody.Builder()
             .add("public_id", publicId)
             .add("timestamp", timestamp)
             .add("signature", signature)
             .add("invalidate", "true")
-            .add("api_key", API_KEY) // Add api_key explicitly
+            .add("api_key", API_KEY)
             .build()
 
         val requestUrl = "https://api.cloudinary.com/v1_1/$CLOUD_NAME/image/destroy"
 
-        val request = Request.Builder()
-            .url(requestUrl)
-            .post(requestBody)
-            .build()
         // Send the request
+        val request = Request.Builder().url(requestUrl).post(requestBody).build()
         val client = OkHttpClient()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: okhttp3.Call, e: IOException) {
@@ -126,10 +118,9 @@ class ReviewViewModel : ViewModel() {
     }
 
 
-
+    // Fetch reviews
     fun fetchAllReviews() {
-        firestore.collection("posts")
-            .get()
+        firestore.collection("posts").get()
             .addOnSuccessListener { snapshot ->
                 val allReviews = snapshot.documents.mapNotNull { it.data }
                 _filteredReviews.value = allReviews // Set all reviews to filteredReviews LiveData
@@ -149,7 +140,6 @@ class ReviewViewModel : ViewModel() {
                     _reviews.value = emptyList()
                     return@addSnapshotListener
                 }
-
                 val reviewList = snapshots?.documents?.mapNotNull { it.data } ?: emptyList()
                 _reviews.value = reviewList
                 Log.d("ReviewViewModel", "Real-time reviews fetched: $reviewList")
@@ -158,8 +148,7 @@ class ReviewViewModel : ViewModel() {
 
     // Fetch specific review details from Firestore
     fun fetchReviewDetails(postId: String) {
-        firestore.collection("posts").document(postId)
-            .get()
+        firestore.collection("posts").document(postId).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     _selectedReview.value = document.data
@@ -174,8 +163,7 @@ class ReviewViewModel : ViewModel() {
 
     // Post a new review to Firestore
     fun postReview(review: Map<String, Any>) {
-        firestore.collection("posts")
-            .add(review)
+        firestore.collection("posts").add(review)
             .addOnSuccessListener { documentReference ->
                 val postId = documentReference.id
                 firestore.collection("posts").document(postId).update("postId", postId)
@@ -188,6 +176,7 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    // Reseting review status
     fun resetPostReviewStatus() {
         _postReviewStatus.value = null
     }
@@ -195,17 +184,15 @@ class ReviewViewModel : ViewModel() {
     // Get the currently logged-in user
     fun getCurrentUser() = FirebaseAuth.getInstance().currentUser
 
-    // Function to fetch comments for a specific review
+    // Fetch comments for a specific review
     fun fetchComments(postId: String) {
-        firestore.collection("comments")
-            .whereEqualTo("postId", postId)
+        firestore.collection("comments").whereEqualTo("postId", postId)
             .addSnapshotListener { snapshots, exception ->
                 if (exception != null) {
                     Log.e("ReviewViewModel", "Failed to listen for comments: $exception")
                     _comments.value = emptyList()
                     return@addSnapshotListener
                 }
-
                 val fetchedComments = snapshots?.map { it.data } ?: emptyList()
                 _comments.value = fetchedComments
                 Log.d("ReviewViewModel", "Real-time comments fetched: $fetchedComments")
@@ -214,8 +201,7 @@ class ReviewViewModel : ViewModel() {
 
     // Function to post a new comment
     fun postComment(postId: String, comment: Map<String, Any>, callback: (Boolean) -> Unit) {
-        firestore.collection("comments")
-            .add(comment)
+        firestore.collection("comments").add(comment)
             .addOnSuccessListener {
                 Log.d("ReviewViewModel", "Comment added with ID: ${it.id}")
                 fetchComments(postId) // Fetch comments again after posting
@@ -227,6 +213,7 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    // Fetch review author
     fun fetchReviewAuthor(userId: String, callback: (String) -> Unit) {
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(userId)
         userDocRef.get()
@@ -239,10 +226,9 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    // Fetch user reviews
     fun fetchUserReviews(userId: String, callback: (List<Map<String, Any>>) -> Unit) {
-        firestore.collection("posts")
-            .whereEqualTo("userId", userId)
-            .get()
+        firestore.collection("posts").whereEqualTo("userId", userId).get()
             .addOnSuccessListener { documents ->
                 val reviews = documents.mapNotNull { it.data }
                 callback(reviews)
@@ -252,9 +238,9 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    // Delete review
     fun deleteReview(postId: String, callback: (Boolean) -> Unit) {
-        firestore.collection("posts").document(postId)
-            .delete()
+        firestore.collection("posts").document(postId).delete()
             .addOnSuccessListener {
                 Log.d("ReviewViewModel", "Review deleted successfully.")
                 callback(true)
@@ -265,11 +251,9 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
-
-
+    // Fetch a single review
     fun fetchReview(postId: String, callback: (Map<String, Any>?) -> Unit) {
-        firestore.collection("posts").document(postId)
-            .get()
+        firestore.collection("posts").document(postId).get()
             .addOnSuccessListener { document ->
                 callback(document.data)
             }
@@ -279,10 +263,9 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
-
+    // Update review
     fun updateReview(postId: String, updatedReview: Map<String, Any>, callback: (Boolean) -> Unit) {
-        firestore.collection("posts").document(postId)
-            .update(updatedReview)
+        firestore.collection("posts").document(postId).update(updatedReview)
             .addOnSuccessListener {
                 callback(true)
             }
@@ -291,21 +274,19 @@ class ReviewViewModel : ViewModel() {
             }
     }
 
+    // Apply filters for "Filter" feature in MapFragment
     fun applyFilters(filters: Map<String, String>, callback: (List<Map<String, Any>>) -> Unit) {
         var query: Query = firestore.collection("posts")
-
         filters["status"]?.let { status ->
             if (status != "All") {
                 query = query.whereEqualTo("status", status)
             }
         }
-
         filters["category"]?.let { category ->
             if (category != "All") {
                 query = query.whereEqualTo("category", category)
             }
         }
-
         query.get().addOnSuccessListener { snapshot ->
             val filteredReviews = snapshot.documents.mapNotNull { it.data }
             callback(filteredReviews)
@@ -315,16 +296,15 @@ class ReviewViewModel : ViewModel() {
         }
     }
 
+    // Apply filters for "Search" feature in MainUserScreen
     fun applyFilters2(filters: Map<String, String>) {
         var query: Query = firestore.collection("posts")
-
         filters["status"]?.let { status ->
             if (status != "All") query = query.whereEqualTo("status", status)
         }
         filters["category"]?.let { category ->
             if (category != "All") query = query.whereEqualTo("category", category)
         }
-
         query.get()
             .addOnSuccessListener { snapshot ->
                 val filteredResults = snapshot.documents.mapNotNull { it.data }

@@ -1,6 +1,5 @@
 package com.example.reviewr.ui
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -18,28 +17,12 @@ class RegisterFragment : Fragment() {
 
     private var _binding: RegisterFragmentBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var userViewModel: UserViewModel
 
-    private var profilePictureUrl: String? = null
-    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            // Use the ViewModel's image upload method
-            userViewModel.uploadProfileImage(it).observe(viewLifecycleOwner) { status ->
-                val (success, imageUrl) = status
-                if (success) {
-                    profilePictureUrl = imageUrl
-                    Toast.makeText(requireContext(), "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "Image upload failed: $imageUrl", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = RegisterFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -49,14 +32,16 @@ class RegisterFragment : Fragment() {
 
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        binding.registerButton.setOnClickListener { registerUser() }
-        binding.uploadPictureButton.setOnClickListener { imagePicker.launch("image/*") }
-        binding.goBackButton.setOnClickListener {
+        binding.registerButton.setOnClickListener { registerUser() } // Registration button
+        binding.uploadPictureButton.setOnClickListener { imagePicker.launch("image/*") } // Upload profile picture button
+        binding.goBackButton.setOnClickListener { // Go back button
             findNavController().navigate(R.id.action_registerFragment_to_welcomeFragment)
         }
     }
 
+    // Register user interface function
     private fun registerUser() {
+
         val username = binding.usernameInput.text.toString().trim()
         val firstName = binding.firstNameInput.text.toString().trim()
         val lastName = binding.lastNameInput.text.toString().trim()
@@ -69,20 +54,19 @@ class RegisterFragment : Fragment() {
             return
         }
 
-        // Register the user with the data and pass the profile picture URL
-        userViewModel.register(email, password, username, firstName, lastName, age)
-            .observe(viewLifecycleOwner) { result ->
+        // Use the UserViewModel register method with the data that was inserted
+        userViewModel.register(email, password, username, firstName, lastName, age).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is UserViewModel.RegistrationResult.Success -> {
                         val userId = userViewModel.getCurrentUser()?.uid
                         userId?.let {
                             val updatedData = HashMap<String, Any>()
                             updatedData["profilePictureUrl"] = profilePictureUrl ?: ""
-                            userViewModel.updateUserDetails(it, updatedData) { success ->
+                            userViewModel.updateUserDetails(it, updatedData) { success -> // Passing the picture URL to Firebase and Cloudinary (Passed separately because it is not mandatory)
                                 if (success) {
-                                    Toast.makeText(requireContext(), "Profile picture updated successfully!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireContext(), "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
                                 } else {
-                                    Toast.makeText(requireContext(), "Failed to update profile picture.", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(requireContext(), "Failed to upload profile picture.", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         }
@@ -94,6 +78,21 @@ class RegisterFragment : Fragment() {
                     }
                 }
             }
+    }
+
+    // Use the UserViewModel image upload method
+    private var profilePictureUrl: String? = null
+    private val imagePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri -> uri?.let {
+        userViewModel.uploadProfileImage(it).observe(viewLifecycleOwner) { status ->
+            val (success, imageUrl) = status
+            if (success) {
+                profilePictureUrl = imageUrl
+                Toast.makeText(requireContext(), "Profile picture uploaded successfully!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Profile picture upload failed: $imageUrl", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {

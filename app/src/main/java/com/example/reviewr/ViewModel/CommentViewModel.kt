@@ -6,32 +6,16 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Comment ViewModel interacts with all of the databases offline and online in the actions regarding to comments
 class CommentViewModel : ViewModel() {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val _comments = MutableLiveData<List<Map<String, Any>>>()
     val comments: LiveData<List<Map<String, Any>>> get() = _comments
 
-
-    // Fetch a specific comment
-    fun fetchComments(postId: String) {
-        firestore.collection("comments")
-            .whereEqualTo("postId", postId)
-            .addSnapshotListener { snapshots, exception ->
-                if (exception != null) {
-                    Log.e("CommentViewModel", "Failed to listen for comments: $exception")
-                    _comments.value = emptyList()
-                    return@addSnapshotListener
-                }
-
-                val fetchedComments = snapshots?.documents?.mapNotNull { it.data } ?: emptyList()
-                _comments.value = fetchedComments
-            }
-    }
-
+    // Fetch single comment
     fun fetchComment(commentId: String, callback: (Map<String, Any>?) -> Unit) {
-        firestore.collection("comments").document(commentId)
-            .get()
+        firestore.collection("comments").document(commentId).get()
             .addOnSuccessListener { document ->
                 callback(document.data)
             }
@@ -41,11 +25,9 @@ class CommentViewModel : ViewModel() {
             }
     }
 
-
     // Update a specific comment
     fun updateComment(commentId: String, updatedComment: Map<String, Any>, callback: (Boolean) -> Unit) {
-        firestore.collection("comments").document(commentId)
-            .update(updatedComment)
+        firestore.collection("comments").document(commentId).update(updatedComment)
             .addOnSuccessListener {
                 Log.d("CommentViewModel", "Comment updated successfully.")
                 callback(true)
@@ -56,10 +38,9 @@ class CommentViewModel : ViewModel() {
             }
     }
 
+    // Fetch all comments from a specific user
     fun fetchUserComments(userId: String, callback: (List<Map<String, Any>>) -> Unit) {
-        firestore.collection("comments")
-            .whereEqualTo("userId", userId)
-            .get()
+        firestore.collection("comments").whereEqualTo("userId", userId).get()
             .addOnSuccessListener { documents ->
                 val comments = documents.mapNotNull { document ->
                     document.data.apply { this["commentId"] = document.id }
@@ -76,8 +57,7 @@ class CommentViewModel : ViewModel() {
 
     // Delete a specific comment
     fun deleteComment(commentId: String, callback: (Boolean) -> Unit) {
-        firestore.collection("comments").document(commentId)
-            .delete()
+        firestore.collection("comments").document(commentId).delete()
             .addOnSuccessListener {
                 Log.d("CommentViewModel", "Comment deleted successfully.")
                 callback(true)
@@ -88,20 +68,16 @@ class CommentViewModel : ViewModel() {
             }
     }
 
+    // Delete comments by postId (Delete all comments related to the post that was being deleted as well)
     fun deleteCommentsByPostId(postId: String, callback: (Boolean) -> Unit) {
-        firestore.collection("comments")
-            .whereEqualTo("postId", postId)
-            .get()
+        firestore.collection("comments").whereEqualTo("postId", postId).get()
             .addOnSuccessListener { commentSnapshots ->
                 val batch = firestore.batch()
-
                 for (comment in commentSnapshots) {
                     val commentId = comment.id
                     val userId = comment.getString("userId") ?: continue
-
                     // Delete the comment
                     batch.delete(comment.reference)
-
                     // Update the user document
                     val userRef = firestore.collection("users").document(userId)
                     batch.update(
@@ -110,7 +86,6 @@ class CommentViewModel : ViewModel() {
                         com.google.firebase.firestore.FieldValue.arrayRemove(commentId)
                     )
                 }
-
                 batch.commit()
                     .addOnSuccessListener {
                         Log.d("CommentViewModel", "All comments for review $postId deleted successfully.")

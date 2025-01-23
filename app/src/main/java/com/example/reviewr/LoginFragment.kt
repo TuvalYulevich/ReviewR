@@ -19,10 +19,7 @@ class LoginFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var userViewModel: UserViewModel
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = LoginFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -33,12 +30,12 @@ class LoginFragment : Fragment() {
         // Initialize ViewModel
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        // Check if user is already remembered
+        // Check if the app should activate the "Remember Me" feature
         val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         val savedEmail = sharedPreferences.getString("email", null)
         val savedPassword = sharedPreferences.getString("password", null)
 
-        if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) {
+        if (!savedEmail.isNullOrEmpty() && !savedPassword.isNullOrEmpty()) { // "Remember Me" feature initiation
             loginUser(savedEmail, savedPassword, rememberMe = true, skipToast = true)
         }
 
@@ -61,7 +58,9 @@ class LoginFragment : Fragment() {
         }
     }
 
+    // Login interface function
     private fun loginUser(email: String, password: String, rememberMe: Boolean = false, skipToast: Boolean = false) {
+        // Use the UserViewModel login method with the data that was inserted
         userViewModel.login(email, password).observe(viewLifecycleOwner) { result ->
             when (result) {
                 is UserViewModel.LoginResult.Success -> {
@@ -70,7 +69,7 @@ class LoginFragment : Fragment() {
                     }
                     navigateToMainScreen()
                     if (!skipToast) {
-                        Toast.makeText(requireContext(), "Login successful!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Login successful, welcome!", Toast.LENGTH_SHORT).show()
                     }
                 }
                 is UserViewModel.LoginResult.Failure -> {
@@ -80,6 +79,7 @@ class LoginFragment : Fragment() {
         }
     }
 
+    // "Remember Me" interface function
     private fun saveUserCredentials(email: String, password: String) {
         val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().apply {
@@ -89,6 +89,7 @@ class LoginFragment : Fragment() {
         }
     }
 
+    // Navigate to the Main User Screen
     private fun navigateToMainScreen() {
         findNavController().navigate(R.id.action_loginFragment_to_mainUserFragment)
     }

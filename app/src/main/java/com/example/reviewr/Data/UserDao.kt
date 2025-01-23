@@ -2,6 +2,7 @@ package com.example.reviewr.Data
 
 import androidx.room.*
 
+// Setting up the user Dao
 @Dao
 interface UserDao {
 
@@ -13,10 +14,11 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertUser(user: UserEntity): Unit
 
+    // Delete current user from Room
     @Query("DELETE FROM users WHERE userId = :userId")
     fun deleteCurrentUser(userId: String): Int
 
-
+    // Delete all users from Room
     @Query("DELETE FROM users")
     fun deleteAllUsers()
 }
