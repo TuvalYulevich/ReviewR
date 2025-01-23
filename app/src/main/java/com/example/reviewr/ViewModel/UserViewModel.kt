@@ -406,7 +406,6 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
     fun updatePassword(currentPassword: String, newPassword: String, callback: (Boolean, String?) -> Unit) {
         val user = FirebaseAuth.getInstance().currentUser
         val credential = EmailAuthProvider.getCredential(user?.email ?: "", currentPassword)
-
         // Reauthenticate the user
         user?.reauthenticate(credential)
             ?.addOnCompleteListener { authTask ->

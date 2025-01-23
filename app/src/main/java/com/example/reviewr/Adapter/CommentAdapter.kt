@@ -12,7 +12,8 @@ import com.example.reviewr.R
 class CommentAdapter(
     private val comments: List<Map<String, Any>>,
     private val onEditClicked: ((Map<String, Any>) -> Unit)? = null,
-    private val onDeleteClicked: ((String) -> Unit)? = null
+    private val onDeleteClicked: ((String) -> Unit)? = null,
+    private val onCommentClicked: ((String) -> Unit)? = null // NEW CALLBACK
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     inner class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,7 +33,6 @@ class CommentAdapter(
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = comments[position]
-        Log.d("CommentAdapter", "Binding comment: ${comment["commentId"]}")
 
         holder.title.text = comment["title"] as? String ?: "No Title"
         holder.description.text = comment["description"] as? String ?: "No Description"
@@ -40,20 +40,20 @@ class CommentAdapter(
         val timestamp = comment["timestamp"] as? com.google.firebase.Timestamp
         holder.time.text = timestamp?.toDate()?.toString() ?: "Unknown Time"
 
-
+        // Handle comment click
+        holder.itemView.setOnClickListener {
+            val postId = comment["postId"] as? String ?: return@setOnClickListener
+            onCommentClicked?.invoke(postId) // NEW NAVIGATION LOGIC
+        }
 
         holder.editButton?.apply {
             visibility = if (onEditClicked != null) View.VISIBLE else View.GONE
-            setOnClickListener {
-                Log.d("CommentAdapter", "Edit button clicked for comment: ${comment["commentId"]}")
-                onEditClicked?.invoke(comment)
-            }
+            setOnClickListener { onEditClicked?.invoke(comment) }
         }
 
         holder.deleteButton?.apply {
             visibility = if (onDeleteClicked != null) View.VISIBLE else View.GONE
             setOnClickListener {
-                Log.d("CommentAdapter", "Delete button clicked for comment: ${comment["commentId"]}")
                 val commentId = comment["commentId"] as? String ?: return@setOnClickListener
                 onDeleteClicked?.invoke(commentId)
             }
@@ -62,3 +62,4 @@ class CommentAdapter(
 
     override fun getItemCount(): Int = comments.size
 }
+
