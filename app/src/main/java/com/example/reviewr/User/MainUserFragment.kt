@@ -24,10 +24,7 @@ class MainUserFragment : Fragment() {
     private lateinit var reviewViewModel: ReviewViewModel
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = MainUserFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -38,7 +35,7 @@ class MainUserFragment : Fragment() {
         // Initialize ViewModel
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
-        // Display the logged-in user's username
+        // Display the logged-in user's username (From the Firebase authenticator)
         val currentUser = userViewModel.getCurrentUser()
         if (currentUser != null) {
             val username = currentUser.displayName ?: currentUser.email ?: "User"
@@ -61,7 +58,7 @@ class MainUserFragment : Fragment() {
         // Initialize ViewModel
         reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
 
-        // Set up the search button click listener
+        // Set up the search button click listener (Search is allowed only if the app is connected to the internet)
         binding.searchReviewsButton.setOnClickListener {
             if (NetworkUtils.isOnline(requireContext())){
             val dialog = SearchDialogFragment { filters ->
@@ -73,7 +70,6 @@ class MainUserFragment : Fragment() {
                             MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
                         )
                     }
-
                     "applyFilters" -> {
                         // Apply filters and navigate to SearchResultsFragment
                         reviewViewModel.applyFilters2(filters)
@@ -90,25 +86,26 @@ class MainUserFragment : Fragment() {
             }
         }
 
-
+        // Navigate to view user information
         binding.viewMyInfoButton.setOnClickListener {
             findNavController().navigate(R.id.action_mainUserFragment_to_viewUserInformationFragment)
         }
 
+        // Logout interface
         binding.logoutButton.setOnClickListener {
             userViewModel.logout()
             clearUserCredentials()
             Toast.makeText(requireContext(), "Logged out successfully.", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_mainUserFragment_to_welcomeFragment)
         }
-
-
     }
 
+    // Clearing user credentials after logout
     private fun clearUserCredentials() {
         val sharedPreferences = requireContext().getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
         sharedPreferences.edit().clear().apply()
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

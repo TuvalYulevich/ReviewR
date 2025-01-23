@@ -62,11 +62,7 @@ class EditMyReviewsFragment : Fragment() {
                                 // Now delete the review
                                 reviewViewModel.deleteReview(postId) { reviewDeleteSuccess ->
                                     if (reviewDeleteSuccess) {
-                                        Toast.makeText(
-                                            requireContext(),
-                                            "Review and associated comments deleted successfully.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        Toast.makeText(requireContext(), "Review and associated comments deleted successfully.", Toast.LENGTH_SHORT).show()
                                         reviewViewModel.fetchUserReviews(userId) { updatedReviews ->
                                             binding.reviewsRecyclerView.adapter = ReviewAdapter(
                                                 updatedReviews,
@@ -89,10 +85,9 @@ class EditMyReviewsFragment : Fragment() {
                     }
                 )
                 binding.reviewsRecyclerView.adapter = adapter
-
             }
         }
-
+        // Go back button
         binding.goBackButton.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }

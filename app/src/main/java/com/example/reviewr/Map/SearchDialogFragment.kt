@@ -37,7 +37,7 @@ class SearchDialogFragment(private val onSearchApplied: (Map<String, String>) ->
         }
 
         goBackButton.setOnClickListener {
-            dismiss() // Simply close the dialog
+            dismiss() // Close the dialog
         }
 
         builder.setView(view)

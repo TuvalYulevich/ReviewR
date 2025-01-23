@@ -17,7 +17,6 @@ class EditCommentFragment : Fragment() {
 
     private var _binding: EditCommentFragmentBinding? = null
     private val binding get() = _binding!!
-    private lateinit var reviewViewModel: ReviewViewModel
     private val args: EditCommentFragmentArgs by navArgs()
 
     override fun onCreateView(

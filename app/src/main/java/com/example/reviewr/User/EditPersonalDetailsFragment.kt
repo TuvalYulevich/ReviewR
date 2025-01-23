@@ -2,7 +2,6 @@ package com.example.reviewr.User
 
 import android.net.Uri
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,18 +9,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.Data.UserEntity
 import com.example.reviewr.ViewModel.UserViewModel
 import com.example.reviewr.databinding.EditPersonalDetailsFragmentBinding
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Callback
-import okhttp3.Response
-import java.io.IOException
+
 
 class EditPersonalDetailsFragment : Fragment() {
 
@@ -34,10 +25,7 @@ class EditPersonalDetailsFragment : Fragment() {
     }
 
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = EditPersonalDetailsFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -58,7 +46,7 @@ class EditPersonalDetailsFragment : Fragment() {
             binding.passwordInput.setText(userDetails["password"] as? String ?: "")
         }
 
-        // Save personal details
+        // Save personal details button
         binding.saveUserDetailsButton.setOnClickListener {
             val updatedData = mapOf(
                 "username" to binding.usernameInput.text.toString().trim(),
@@ -66,12 +54,10 @@ class EditPersonalDetailsFragment : Fragment() {
                 "lastName" to binding.lastNameInput.text.toString().trim(),
                 "age" to binding.ageInput.text.toString().trim()
             )
-
             userViewModel.updateUserDetails(userId, updatedData) { success ->
                 if (success) {
                     Toast.makeText(requireContext(), "Personal details updated successfully.", Toast.LENGTH_SHORT).show()
                     userViewModel.updateReviewsAndComments(userId, updatedData)
-
                     // Save to Room database
                     userViewModel.fetchUserDetails(userId) { userDetails ->
                         val updatedUser = UserEntity(
@@ -92,7 +78,7 @@ class EditPersonalDetailsFragment : Fragment() {
             }
         }
 
-        // Save email
+        // Save email button
         binding.saveEmailButton.setOnClickListener {
             val email = binding.emailInput.text.toString().trim()
             val password = binding.passwordInput.text.toString().trim()
@@ -124,7 +110,7 @@ class EditPersonalDetailsFragment : Fragment() {
             }
         }
 
-        // Save password
+        // Save password button
         binding.savePasswordButton.setOnClickListener {
             val currentPassword = binding.currentPasswordInput.text.toString().trim()
             val newPassword = binding.newPasswordInput.text.toString().trim()
@@ -135,6 +121,7 @@ class EditPersonalDetailsFragment : Fragment() {
             }
             userViewModel.updatePassword(currentPassword, newPassword) { success, errorMessage ->
                 if (success) {
+                    // Save to Room database
                     userViewModel.fetchUserDetails(userId) { userDetails ->
                         val updatedUser = UserEntity(
                             userId = userId,
@@ -196,11 +183,11 @@ class EditPersonalDetailsFragment : Fragment() {
         }
     }
 
+    // Upload a new profile picture (Update profile picture) interface
     private fun uploadNewProfilePicture(uri: Uri) {
         val userId = userViewModel.getCurrentUser()?.uid ?: return
         userViewModel.fetchUserDetails(userId) { userDetails ->
             val oldProfilePictureUrl = userDetails["profilePictureUrl"] as? String
-
             userViewModel.uploadProfileImage(uri).observe(viewLifecycleOwner) { (success, imageUrl) ->
                 if (success && imageUrl != null) {
                     userViewModel.updateUserDetails(userId, mapOf("profilePictureUrl" to imageUrl)) { updateSuccess ->
@@ -234,8 +221,6 @@ class EditPersonalDetailsFragment : Fragment() {
             }
         }
     }
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()

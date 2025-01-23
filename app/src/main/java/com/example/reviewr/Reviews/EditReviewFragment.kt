@@ -14,13 +14,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
-import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.R
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.EditReviewFragmentBinding
-import java.io.IOException
+
 
 class EditReviewFragment : Fragment() {
 
@@ -35,10 +32,7 @@ class EditReviewFragment : Fragment() {
         uri?.let { uploadNewImage(it) }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = EditReviewFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -56,7 +50,7 @@ class EditReviewFragment : Fragment() {
             }
         }
 
-        // Save Button Logic
+        // Save Button
         binding.saveButton.setOnClickListener {
             val updatedReview = mapOf(
                 "title" to binding.reviewTitleInput.text.toString().trim(),
@@ -76,13 +70,12 @@ class EditReviewFragment : Fragment() {
             }
         }
 
-
-        // Cancel Button Logic
+        // Cancel Button
         binding.cancelButton.setOnClickListener {
             findNavController().navigateUp()
         }
 
-        // Upload Image Button Logic
+        // Upload Image Button
         binding.uploadImageButton.setOnClickListener {
             imagePicker.launch("image/*")
         }
@@ -93,6 +86,7 @@ class EditReviewFragment : Fragment() {
         }
     }
 
+    // Get the review data to the editing screen
     private fun populateReviewDetails(review: Map<String, Any>) {
         binding.reviewTitleInput.setText(review["title"] as? String)
         binding.reviewDescriptionInput.setText(review["description"] as? String)
@@ -130,6 +124,7 @@ class EditReviewFragment : Fragment() {
         }
     }
 
+    // Uploading a new image to the review interface
     private fun uploadNewImage(uri: Uri) {
         currentImageUrl?.let { oldImageUrl ->
             // Delete the old image from Cloudinary
@@ -139,7 +134,6 @@ class EditReviewFragment : Fragment() {
                 }
             }
         }
-
         reviewViewModel.uploadReviewImage(uri)
         reviewViewModel.imageUploadStatus.observe(viewLifecycleOwner) { (success, imageUrl) ->
             if (success && imageUrl != null) {
@@ -157,7 +151,6 @@ class EditReviewFragment : Fragment() {
                         Log.e("EditReviewFragment", "Failed to update review with new image URL.")
                     }
                 }
-
                 Toast.makeText(requireContext(), "Image uploaded successfully!", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Failed to upload image.", Toast.LENGTH_SHORT).show()
@@ -165,7 +158,7 @@ class EditReviewFragment : Fragment() {
         }
     }
 
-
+    // Delete the current image
     private fun deleteCurrentImage() {
         currentImageUrl?.let { imageUrl ->
             val postId = args.postId // Ensure you have the postId from arguments
@@ -178,7 +171,6 @@ class EditReviewFragment : Fragment() {
                         Toast.makeText(requireContext(), "Image removed from review.", Toast.LENGTH_SHORT).show()
                         currentImageUrl = null
                         binding.reviewImageView.visibility = View.GONE
-
                         // Proceed to delete the image from Cloudinary
                         reviewViewModel.deleteReviewImage(imageUrl) { deleteSuccess ->
                             if (!deleteSuccess) {
@@ -194,11 +186,6 @@ class EditReviewFragment : Fragment() {
             Toast.makeText(requireContext(), "No image to delete.", Toast.LENGTH_SHORT).show()
         }
     }
-
-
-
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()

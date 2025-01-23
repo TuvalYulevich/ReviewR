@@ -41,10 +41,7 @@ class MapFragment : Fragment() {
     private lateinit var reviewViewModel: ReviewViewModel
     private val reviewMarkers = mutableMapOf<String, Marker>()
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         // Initialize map configuration
         Configuration.getInstance().load(requireContext(), requireContext().getSharedPreferences("osm_prefs", 0))
         _binding = MapFragmentBinding.inflate(inflater, container, false)
@@ -82,6 +79,7 @@ class MapFragment : Fragment() {
         setupLongPressListener()
     }
 
+    // Setting up the map
     private fun setupMapView() {
         mapView.setMultiTouchControls(true)
         mapView.controller.setZoom(15.0)
@@ -89,14 +87,14 @@ class MapFragment : Fragment() {
         mapView.controller.setCenter(GeoPoint(37.7749, -122.4194)) // San Francisco placeholder
     }
 
+    // Getting the location premissions
     private fun checkLocationPermission() {
         when {
             ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED -> {
                 showUserLocation()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                Snackbar.make(binding.root, "Location permission is required to show your location on the map.", Snackbar.LENGTH_INDEFINITE)
-                    .setAction("Grant") {
+                Snackbar.make(binding.root, "Location permission is required to show your location on the map.", Snackbar.LENGTH_INDEFINITE).setAction("Grant") {
                         requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                     }.show()
             }
@@ -106,6 +104,7 @@ class MapFragment : Fragment() {
         }
     }
 
+    // Request the location permissions
     private val requestLocationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -116,6 +115,7 @@ class MapFragment : Fragment() {
         }
     }
 
+    // Showing the users location on the map
     private fun showUserLocation() {
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             if (location != null) {
@@ -124,7 +124,7 @@ class MapFragment : Fragment() {
                 // Add marker for user location
                 val marker = Marker(mapView).apply {
                     position = userLocation
-                    title = "You are here"
+                    title = "You are here" // Present it when tapping the marker
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 }
                 // Remove existing "self-location" markers to avoid duplication
@@ -145,13 +145,13 @@ class MapFragment : Fragment() {
         }
     }
 
-
+    // Bottom toolbar interface code
     private fun handleBottomNavigation(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.filterButton -> {
                 val dialog = FilterDialogFragment { action, filters ->
                     when (action) {
-                        "applyFilters" -> {
+                        "applyFilters" -> { // Apply filters for the "Filter" button
                             filters?.let { reviewViewModel.applyFilters(it) { filteredReviews ->
                                 updateMapMarkers(filteredReviews)
                             } }
@@ -178,9 +178,7 @@ class MapFragment : Fragment() {
         }
     }
 
-
-
-
+    // Updating the markers on the map
     private fun updateMapMarkers(reviews: List<Map<String, Any>>) {
         // Remove only review markers but keep the user's location marker
         mapView.overlays.removeAll { overlay ->
@@ -217,9 +215,7 @@ class MapFragment : Fragment() {
         mapView.invalidate() // Refresh the map
     }
 
-
-
-
+    // Activating the long press on the map in order to add a review
     private fun setupLongPressListener() {
         mapView.setOnTouchListener { _, motionEvent ->
             when (motionEvent.action) {
@@ -234,6 +230,7 @@ class MapFragment : Fragment() {
         }
     }
 
+    // Long press interface
     private fun startLongPressHandler(motionEvent: MotionEvent) {
         longPressHandler = Handler(Looper.getMainLooper())
         longPressRunnable = Runnable {
@@ -246,12 +243,14 @@ class MapFragment : Fragment() {
         longPressHandler?.postDelayed(longPressRunnable!!, 1000) // 1 second delay
     }
 
+    // Cancel it
     private fun cancelLongPressHandler() {
         longPressHandler?.removeCallbacks(longPressRunnable!!)
         longPressHandler = null
         longPressRunnable = null
     }
 
+    // Display the reviews on the map
     private fun displayReviewsOnMap(reviews: List<Map<String, Any>>) {
         Log.d("MapFragment", "Displaying reviews on map. Existing overlays: ${mapView.overlays.size}")
 
@@ -320,7 +319,7 @@ class MapFragment : Fragment() {
     }
 
 
-
+    // Show the add review dialog when touching a location in the map for more than 1000 seconds
     private fun showAddReviewDialog(location: GeoPoint) {
         if(NetworkUtils.isOnline(requireContext())) {
             val builder = AlertDialog.Builder(requireContext())
@@ -343,6 +342,7 @@ class MapFragment : Fragment() {
         }
     }
 
+    // Show the review dialog
     private fun showReviewDialog(postId: String) {
         val builder = AlertDialog.Builder(requireContext())
         builder.setTitle("Review Options")
@@ -374,9 +374,6 @@ class MapFragment : Fragment() {
 
         showUserLocation()
     }
-
-
-
 
     override fun onPause() {
         super.onPause()
