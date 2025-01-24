@@ -7,6 +7,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.RegisterFragment">
 
+
+    <!-- Background ImageView
+    <ImageView
+        android:id="@+id/backgroundImageView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" /> -->
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -22,55 +34,62 @@
             <EditText
                 android:id="@+id/usernameInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
+                android:background="#FFFFFF"
                 android:hint="Username"
                 android:inputType="textPersonName" />
 
             <EditText
                 android:id="@+id/firstNameInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:background="#FFFFFF"
                 android:hint="First Name"
-                android:inputType="textPersonName"
-                android:layout_marginTop="8dp" />
+                android:inputType="textPersonName" />
 
             <EditText
                 android:id="@+id/lastNameInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="Last Name"
                 android:inputType="textPersonName"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:background="#FFFFFF"/>
 
             <EditText
                 android:id="@+id/emailInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:background="#FFFFFF"/>
 
             <EditText
                 android:id="@+id/passwordInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:background="#FFFFFF"/>
 
             <EditText
                 android:id="@+id/ageInput"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:hint="Age"
                 android:inputType="number"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="8dp"
+                android:background="#FFFFFF"/>
 
             <Button
                 android:id="@+id/uploadPictureButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Upload Profile Picture"
+                android:text="Upload a Profile Picture 📷 (Optional)"
+                android:textSize="20sp"
                 android:layout_marginTop="16dp" />
 
             <LinearLayout
@@ -85,7 +104,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Register" />
+                    android:text="Register 📝"
+                    android:textSize="20sp"/>
 
                 <Button
                     android:id="@+id/goBackButton"
@@ -93,8 +113,24 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:text="Go Back" />
+                    android:text="Go Back 🔙"
+                    android:textSize="20sp"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
+
+    <!-- Help TextView at the bottom -->
+    <TextView
+        android:id="@+id/helpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Please fill all of the details above.\nNote: Uploading a profile picture is not mandatory."
+        android:textSize="20sp"
+        android:textColor="#000000"
+        android:background="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_margin="16dp"
+        android:gravity="center" />
 </androidx.constraintlayout.widget.ConstraintLayout>
