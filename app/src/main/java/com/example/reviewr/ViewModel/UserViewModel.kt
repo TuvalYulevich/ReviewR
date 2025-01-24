@@ -1,6 +1,7 @@
 package com.example.reviewr.ViewModel
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -11,12 +12,15 @@ import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
 import com.example.reviewr.Data.AppDatabase
+import com.example.reviewr.Data.AppImageDao
+import com.example.reviewr.Data.AppImageEntity
 import com.example.reviewr.Data.UserEntity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -33,6 +37,7 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
 
     private val database = AppDatabase.getInstance(application.applicationContext)
     private val userDao = database.userDao()
+    private val context = getApplication<Application>().applicationContext
 
 
     init { Log.d("DatabaseInit", "Database: $database, UserDao: $userDao") } // Debugging statement to verify Database launch
@@ -218,6 +223,8 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                                         try {
                                             Log.d("UserViewModel", "Inserting user into Room: $userEntity")
                                             userDao.insertUser(userEntity)
+                                            //
+                                            fetchAndSaveImageUrls(context)
                                             Log.d("UserViewModel", "User inserted into Room successfully")
                                         } catch (e: Exception) {
                                             Log.e("UserViewModel", "Failed to insert user into Room: ${e.message}")
@@ -230,6 +237,7 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                             .addOnFailureListener { e ->
                                 Log.e("UserViewModel", "Failed to fetch user data from Firestore: ${e.message}")
                             }
+
                     }
                     loginResult.value = LoginResult.Success
                 } else {
@@ -240,18 +248,39 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
         return loginResult
     }
 
+    // Loading and fetching app image url from Firebase
+    private suspend fun fetchAndSaveImageUrls(context: Context) {
+        try {
+            val imageCollection = firestore.collection("appImages")
+            val snapshot = imageCollection.get().await()
+            // Fetch all image URLs from Firestore and map them to AppImageEntity
+            val imageUrls = snapshot.documents.mapNotNull { document ->
+                document.getString("appImageUrl")?.let { url -> AppImageEntity(url = url) }
+            }
+            // Access the database and perform operations
+            val database = AppDatabase.getInstance(context)
+            database.appImageDao().apply {
+                clearTable() // Clear existing entries
+                insertAll(imageUrls) // Insert fetched image URLs
+            }
+            Log.d("FetchAndSave", "Image URLs successfully saved to Room")
+        } catch (e: Exception) {
+            Log.e("FetchAndSave", "Failed to fetch or save image URLs: ${e.message}")
+        }
+    }
+
+
     // Logout user
     fun logout() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 userDao.deleteAllUsers() // Clear the Room database
+                database.appImageDao().clearTable()
                 Log.d("UserViewModel", "All users deleted from Room database.")
             } catch (e: Exception) {
                 Log.e("UserViewModel", "Failed to delete all users from Room: ${e.message}")
             }
         }
-        auth.signOut() // Sign out the user from Firebase Authentication
-        Log.d("UserViewModel", "User signed out.")
     }
 
     // Fetching user details
