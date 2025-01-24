@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Primary Colors -->
+    <color name="primary">#64B5F6</color> <!-- Light Blue -->
+    <color name="primary_variant">#42A5F5</color> <!-- Soft Blue -->
+    <color name="on_primary">#FFFFFF</color> <!-- White for text on primary -->
+
+    <!-- Secondary Colors -->
+    <color name="secondary">#00BCD4</color> <!-- Cyan -->
+    <color name="on_secondary">#FFFFFF</color> <!-- White for text on secondary -->
+
+    <!-- Accent Colors -->
+    <color name="accent">#2196F3</color> <!-- Neon Blue -->
+    <color name="on_accent">#FFFFFF</color> <!-- White for text on accent -->
+
     <!-- Neutral Colors -->
     <color name="neutral_primary">#333333</color> <!-- Neutral dark gray -->
-    <color name="neutral_on_primary">#FFFFFF</color> <!-- White for text on primary -->
+    <color name="neutral_on_primary">#FFFFFF</color> <!-- White for text on neutral primary -->
     <color name="neutral_surface">#F5F5F5</color> <!-- Light gray background -->
-    <color name="neutral_on_surface">#333333</color> <!-- Dark gray text on surface -->
+    <color name="neutral_on_surface">#37474F</color> <!-- Dark Blue Gray -->
+
+    <!-- Background and Surface -->
+    <color name="background">#F0F4F8</color> <!-- Very Light Gray -->
+    <color name="surface">#FFFFFF</color> <!-- White surface -->
+    <color name="on_background">#37474F</color> <!-- Text color on background -->
+    <color name="on_surface">#333333</color> <!-- Text color on surface -->
+
 </resources>
+
