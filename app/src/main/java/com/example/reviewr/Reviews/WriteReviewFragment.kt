@@ -125,6 +125,10 @@ class WriteReviewFragment : Fragment() {
         when (result) {
             true -> {
                 Toast.makeText(requireContext(), "Review posted successfully!", Toast.LENGTH_SHORT).show()
+                // Reset image and variables
+                reviewImageUrl = null
+                binding.reviewImageView.visibility = View.GONE
+                binding.reviewImageView.setImageDrawable(null) // Clear the ImageView
                 findNavController().navigateUp()
                 reviewViewModel.resetPostReviewStatus()
             }

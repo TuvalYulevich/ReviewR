@@ -100,12 +100,20 @@ class MainUserFragment : Fragment() {
         }
 
         // Logout interface
+        // Logout interface
         binding.logoutButton.setOnClickListener {
-            userViewModel.logout()
-            clearUserCredentials()
-            Toast.makeText(requireContext(), "Logged out successfully.", Toast.LENGTH_SHORT).show()
-            findNavController().navigate(R.id.action_mainUserFragment_to_welcomeFragment)
+            val currentUser = userViewModel.getCurrentUser()
+            if (currentUser != null) {
+                val userId = currentUser.uid
+                userViewModel.logout(userId) // Pass the userId to the logout function
+                clearUserCredentials()
+                Toast.makeText(requireContext(), "Logged out successfully.", Toast.LENGTH_SHORT).show()
+                findNavController().navigate(R.id.action_mainUserFragment_to_welcomeFragment)
+            } else {
+                Toast.makeText(requireContext(), "No user is logged in.", Toast.LENGTH_SHORT).show()
+            }
         }
+
     }
 
     // Clearing user credentials after logout

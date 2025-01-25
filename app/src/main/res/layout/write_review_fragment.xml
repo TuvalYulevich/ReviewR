@@ -62,7 +62,7 @@
             android:layout_height="200dp"
             android:layout_marginTop="16dp"
             android:contentDescription="Uploaded Review Image"
-            android:scaleType="centerCrop"
+            android:scaleType="fitCenter"
             android:visibility="gone" />
 
         <Button

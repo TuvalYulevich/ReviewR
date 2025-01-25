@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.reviewr.R
 
 class ReviewAdapter(
-    private val reviews: List<Map<String, Any>>,
+    var reviews: MutableList<Map<String, Any>>,
     private val showEditDeleteButtons: Boolean = true,
     private val onEditClicked: ((Map<String, Any>) -> Unit)? = null, // Nullable callback
     private val onDeleteClicked: ((String) -> Unit)? = null, // Nullable callback

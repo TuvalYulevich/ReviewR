@@ -48,21 +48,25 @@ class EditMyCommentsFragment : Fragment() {
                 binding.commentsRecyclerView.visibility = View.VISIBLE
 
                 val adapter = CommentAdapter(
-                    comments = comments,
+                    comments = comments.toMutableList(),
                     onEditClicked = { comment ->
                         val commentId = comment["commentId"] as? String ?: return@CommentAdapter
                         val action = EditMyCommentsFragmentDirections.actionEditMyCommentsFragmentToEditCommentFragment(commentId)
                         findNavController().navigate(action)
                     },
                     onDeleteClicked = { commentId ->
-                        commentViewModel.deleteComment(commentId) { success ->
-                            if (success) {
-                                Toast.makeText(requireContext(), "Comment deleted successfully.", Toast.LENGTH_SHORT).show()
-                                commentViewModel.fetchUserComments(userId) { updatedComments ->
-                                    binding.commentsRecyclerView.adapter = CommentAdapter(updatedComments)
+                        val adapter = binding.commentsRecyclerView.adapter as? CommentAdapter ?: return@CommentAdapter
+                        val position = adapter.comments.indexOfFirst { it["commentId"] == commentId }
+                        if (position != -1) {
+                            commentViewModel.deleteComment(commentId) { success ->
+                                if (success) {
+                                    Toast.makeText(requireContext(), "Comment deleted successfully.", Toast.LENGTH_SHORT).show()
+                                    // Remove the comment from the adapter and notify it
+                                    adapter.comments.removeAt(position)
+                                    adapter.notifyItemRemoved(position)
+                                } else {
+                                    Toast.makeText(requireContext(), "Failed to delete comment.", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                Toast.makeText(requireContext(), "Failed to delete comment.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     },

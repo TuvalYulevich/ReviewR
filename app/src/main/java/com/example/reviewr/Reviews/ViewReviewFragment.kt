@@ -162,7 +162,7 @@ class ViewReviewFragment : Fragment() {
         } else {
             binding.commentsRecyclerView.visibility = View.VISIBLE
             binding.noCommentsText.visibility = View.GONE
-            val adapter = CommentAdapter(comments)
+            val adapter = CommentAdapter(comments.toMutableList())
             binding.commentsRecyclerView.adapter = adapter
             adapter.notifyDataSetChanged() // Ensure the RecyclerView refreshes
         }
