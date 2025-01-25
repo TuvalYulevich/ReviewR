@@ -47,7 +47,7 @@ class EditMyReviewsFragment : Fragment() {
                 binding.reviewsRecyclerView.visibility = View.VISIBLE
 
                 val adapter = ReviewAdapter(
-                    reviews = reviews,
+                    reviews = reviews.toMutableList(),
                     showEditDeleteButtons = true, // Show edit/delete buttons
                     onEditClicked = { review ->
                         val postId = review["postId"] as? String ?: return@ReviewAdapter
@@ -55,30 +55,33 @@ class EditMyReviewsFragment : Fragment() {
                         findNavController().navigate(action)
                     },
                     onDeleteClicked = { postId ->
-                        // Delete comments first using CommentViewModel
-                        val commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
-                        commentViewModel.deleteCommentsByPostId(postId) { commentDeleteSuccess ->
-                            if (commentDeleteSuccess) {
-                                // Now delete the review
-                                reviewViewModel.deleteReview(postId) { reviewDeleteSuccess ->
-                                    if (reviewDeleteSuccess) {
-                                        Toast.makeText(requireContext(), "Review and associated comments deleted successfully.", Toast.LENGTH_SHORT).show()
-                                        reviewViewModel.fetchUserReviews(userId) { updatedReviews ->
-                                            binding.reviewsRecyclerView.adapter = ReviewAdapter(
-                                                updatedReviews,
-                                                onEditClicked = { review -> /* Same edit logic */ },
-                                                onDeleteClicked = { postId -> /* Same delete logic */ }
-                                            )
+                        val adapter = binding.reviewsRecyclerView.adapter as? ReviewAdapter ?: return@ReviewAdapter
+                        val position = adapter.reviews.indexOfFirst { it["postId"] == postId }
+                        if (position != -1) {
+                            val commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
+                            commentViewModel.deleteCommentsByPostId(postId) { commentDeleteSuccess ->
+                                if (commentDeleteSuccess) {
+                                    reviewViewModel.deleteReview(postId) { reviewDeleteSuccess ->
+                                        if (reviewDeleteSuccess) {
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Review and associated comments deleted successfully.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            // Remove the item from the adapter and notify it
+                                            adapter.reviews.removeAt(position)
+                                            adapter.notifyItemRemoved(position)
+                                        } else {
+                                            Toast.makeText(requireContext(), "Failed to delete review.", Toast.LENGTH_SHORT).show()
                                         }
-                                    } else {
-                                        Toast.makeText(requireContext(), "Failed to delete review.", Toast.LENGTH_SHORT).show()
                                     }
+                                } else {
+                                    Toast.makeText(requireContext(), "Failed to delete comments for the review.", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                Toast.makeText(requireContext(), "Failed to delete comments for the review.", Toast.LENGTH_SHORT).show()
                             }
                         }
-                    },
+                    }
+                    ,
                     onItemClicked = { postId ->
                         val action = EditMyReviewsFragmentDirections.actionEditMyReviewsFragmentToViewReviewFragment(postId)
                         findNavController().navigate(action)

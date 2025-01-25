@@ -3,8 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="@color/background">
 
+    <!-- Message displayed when no comments are available -->
     <TextView
         android:id="@+id/noCommentsText"
         android:layout_width="match_parent"
@@ -13,19 +15,33 @@
         android:gravity="center"
         android:visibility="gone"
         android:textSize="16sp"
-        android:padding="16dp" />
+        android:textStyle="bold"
+        android:padding="16dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
+        android:layout_marginBottom="8dp" />
 
+    <!-- RecyclerView for displaying comments -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/commentsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:clipToPadding="false"
+        android:padding="8dp"
+        android:background="@android:color/white"
+        android:elevation="2dp"
         android:descendantFocusability="blocksDescendants" />
 
+    <!-- Go Back button -->
     <Button
         android:id="@+id/goBackButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go Back"
+        android:text="Go Back 🔙"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background="@drawable/rounded_background"
+        android:elevation="4dp"
         android:layout_marginTop="16dp" />
 </LinearLayout>

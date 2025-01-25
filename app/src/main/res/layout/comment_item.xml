@@ -51,14 +51,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Edit" />
+            android:text="Edit ✏️" />
 
         <Button
             android:id="@+id/commentDeleteButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete"
+            android:text="Delete 🗑️"
             android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>

@@ -196,57 +196,92 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
     // Login user
     fun login(email: String, password: String): LiveData<LoginResult> {
         val loginResult = MutableLiveData<LoginResult>()
-        auth.signInWithEmailAndPassword(email, password) // Firebase auth using E-Mail and passwrd
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("UserViewModel", "Login successful for email: $email")
-                    val firebaseUser = auth.currentUser
-                    if (firebaseUser != null) {
-                        Log.d("UserViewModel", "Fetching user data from Firestore for userId: ${firebaseUser.uid}")
-                        firestore.collection("users").document(firebaseUser.uid)
-                            .get()
-                            .addOnSuccessListener { document ->
-                                // If login is successfull, save user data to Room.
-                                if (document.exists()) {
-                                    Log.d("UserViewModel", "User data fetched from Firestore: ${document.data}")
-                                    val userEntity = UserEntity(
-                                        userId = firebaseUser.uid,
-                                        username = document.getString("username") ?: "Unknown",
-                                        firstName = document.getString("firstName") ?: "Unknown",
-                                        lastName = document.getString("lastName") ?: "Unknown",
-                                        email = document.getString("email") ?: email,
-                                        age = document.getString("age") ?: "Unknown",
-                                        profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown",
-                                        password = document.getString("password") ?: password
-                                    )
-                                    viewModelScope.launch(Dispatchers.IO) {
-                                        try {
-                                            Log.d("UserViewModel", "Inserting user into Room: $userEntity")
-                                            userDao.insertUser(userEntity)
-                                            //
-                                            fetchAndSaveImageUrls(context)
-                                            Log.d("UserViewModel", "User inserted into Room successfully")
-                                        } catch (e: Exception) {
-                                            Log.e("UserViewModel", "Failed to insert user into Room: ${e.message}")
+        val deviceId = android.provider.Settings.Secure.getString(context.contentResolver, android.provider.Settings.Secure.ANDROID_ID)
+        firestore.collection("users").whereEqualTo("email", email).get()
+            .addOnSuccessListener { querySnapshot ->
+                if (!querySnapshot.isEmpty) {
+                    val userDocument = querySnapshot.documents[0]
+                    val userId = userDocument.id
+                    val activeSession = userDocument.getString("activeSession")
+                    // Check if the user is already logged in from another device
+                    if (activeSession != null && activeSession != deviceId) {
+                        loginResult.value = LoginResult.Failure("You are already logged in from another device.")
+                        return@addOnSuccessListener
+                    }
+                    // Proceed with Firebase Authentication
+                    auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("UserViewModel", "Login successful for email: $email")
+                            val firebaseUser = auth.currentUser
+                            if (firebaseUser != null) {
+                                Log.d("UserViewModel", "Fetching user data from Firestore for userId: ${firebaseUser.uid}")
+                                firestore.collection("users").document(firebaseUser.uid)
+                                    .get()
+                                    .addOnSuccessListener { document ->
+                                        // If login is successful, save user data to Room
+                                        if (document.exists()) {
+                                            Log.d("UserViewModel", "User data fetched from Firestore: ${document.data}")
+                                            val userEntity = UserEntity(
+                                                userId = firebaseUser.uid,
+                                                username = document.getString("username") ?: "Unknown",
+                                                firstName = document.getString("firstName") ?: "Unknown",
+                                                lastName = document.getString("lastName") ?: "Unknown",
+                                                email = document.getString("email") ?: email,
+                                                age = document.getString("age") ?: "Unknown",
+                                                profileImageUrl = document.getString("profilePictureUrl") ?: "Unknown",
+                                                password = document.getString("password") ?: password
+                                            )
+                                            viewModelScope.launch(Dispatchers.IO) {
+                                                try {
+                                                    Log.d("UserViewModel", "Inserting user into Room: $userEntity")
+                                                    userDao.insertUser(userEntity)
+                                                    // Fetch and save app image URLs
+                                                    fetchAndSaveImageUrls(context)
+                                                    Log.d("UserViewModel", "User inserted into Room successfully")
+                                                } catch (e: Exception) {
+                                                    Log.e("UserViewModel", "Failed to insert user into Room: ${e.message}")
+                                                }
+                                            }
+                                            // Update the active session in Firestore
+                                            firestore.collection("users").document(firebaseUser.uid)
+                                                .update("activeSession", deviceId)
+                                                .addOnSuccessListener {
+                                                    Log.d("UserViewModel", "Active session updated for user: $userId")
+                                                    loginResult.value = LoginResult.Success
+                                                }
+                                                .addOnFailureListener { e ->
+                                                    Log.e("UserViewModel", "Failed to update active session: ${e.message}")
+                                                    loginResult.value = LoginResult.Failure("Failed to update active session.")
+                                                }
+                                        } else {
+                                            Log.e("UserViewModel", "User document does not exist in Firestore")
+                                            loginResult.value = LoginResult.Failure("User data not found in Firestore.")
                                         }
                                     }
-                                } else {
-                                    Log.e("UserViewModel", "User document does not exist in Firestore")
-                                }
+                                    .addOnFailureListener { e ->
+                                        Log.e("UserViewModel", "Failed to fetch user data from Firestore: ${e.message}")
+                                        loginResult.value = LoginResult.Failure("Failed to fetch user data.")
+                                    }
+                            } else {
+                                loginResult.value = LoginResult.Failure("Firebase user is null.")
                             }
-                            .addOnFailureListener { e ->
-                                Log.e("UserViewModel", "Failed to fetch user data from Firestore: ${e.message}")
-                            }
-
+                        } else {
+                            Log.e("UserViewModel", "Login failed: ${task.exception?.message}")
+                            loginResult.value = LoginResult.Failure(task.exception?.message)
+                        }
                     }
-                    loginResult.value = LoginResult.Success
                 } else {
-                    Log.e("UserViewModel", "Login failed: ${task.exception?.message}")
-                    loginResult.value = LoginResult.Failure(task.exception?.message)
+                    loginResult.value = LoginResult.Failure("User not found.")
                 }
             }
+            .addOnFailureListener { e ->
+                Log.e("UserViewModel", "Failed to fetch user: ${e.message}")
+                loginResult.value = LoginResult.Failure("Failed to fetch user details.")
+            }
+
         return loginResult
     }
+
 
     // Loading and fetching app image url from Firebase
     private suspend fun fetchAndSaveImageUrls(context: Context) {
@@ -271,7 +306,15 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
 
 
     // Logout user
-    fun logout() {
+    fun logout(userId: String) {
+        firestore.collection("users").document(userId).update("activeSession", null)
+            .addOnSuccessListener {
+                Log.d("UserViewModel", "Active session cleared for user: $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.e("UserViewModel", "Failed to clear active session: ${e.message}")
+            }
+        auth.signOut()
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 userDao.deleteAllUsers() // Clear the Room database
@@ -282,6 +325,7 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
 
     // Fetching user details
     fun fetchUserDetails(userId: String, callback: (Map<String, Any>) -> Unit) {
@@ -452,5 +496,8 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
                 }
             }
     }
+
+
+
 
 }

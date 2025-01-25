@@ -38,7 +38,7 @@ class SearchResultsFragment : Fragment() {
         // Observe filteredReviews to update RecyclerView
         reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
             val adapter = ReviewAdapter(
-                reviews = reviews,
+                reviews = reviews.toMutableList(),
                 showEditDeleteButtons = false, // Hide edit/delete buttons
                 onItemClicked = { postId ->
                     val action = SearchResultsFragmentDirections.actionSearchResultsFragmentToViewReviewFragment(postId)

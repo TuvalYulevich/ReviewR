@@ -79,7 +79,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Login"
+            android:text="Login ✅"
             android:textColor="#FFFFFF"
             android:backgroundTint="#03A9F4"
             android:layout_marginEnd="8dp"
@@ -91,7 +91,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Go Back"
+            android:text="Go Back 🔙"
             android:textColor="#FFFFFF"
             android:backgroundTint="#03A9F4"
             android:paddingVertical="12dp" />

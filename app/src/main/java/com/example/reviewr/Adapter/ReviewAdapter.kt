@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.reviewr.R
 
 class ReviewAdapter(
-    private val reviews: List<Map<String, Any>>,
+    var reviews: MutableList<Map<String, Any>>,
     private val showEditDeleteButtons: Boolean = true,
     private val onEditClicked: ((Map<String, Any>) -> Unit)? = null, // Nullable callback
     private val onDeleteClicked: ((String) -> Unit)? = null, // Nullable callback
@@ -23,6 +23,8 @@ class ReviewAdapter(
         val category: TextView = itemView.findViewById(R.id.reviewCategory)
         val editButton: Button = itemView.findViewById(R.id.editButton)
         val deleteButton: Button = itemView.findViewById(R.id.deleteButton)
+        val editedTime: TextView = itemView.findViewById(R.id.reviewEditedTime)
+        val time: TextView = itemView.findViewById(R.id.reviewTime)
 
         init {
             itemView.setOnClickListener {
@@ -46,6 +48,16 @@ class ReviewAdapter(
         holder.description.text = review["description"] as? String ?: "No Description"
         holder.status.text = "Status: ${review["status"] as? String ?: "Unknown"}"
         holder.category.text = "Category: ${review["category"] as? String ?: "Unknown"}"
+        val timestamp = review["timestamp"] as? com.google.firebase.Timestamp
+        holder.time.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
+
+        val lastEdited = review["lastEdited"] as? com.google.firebase.Timestamp
+        if (lastEdited != null) {
+            holder.editedTime.text = "Edited: ${lastEdited.toDate()}"
+            holder.editedTime.visibility = View.VISIBLE
+        } else {
+            holder.editedTime.visibility = View.GONE
+        }
 
         // Set visibility and click listeners for edit and delete buttons
         if (showEditDeleteButtons) {

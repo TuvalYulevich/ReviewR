@@ -240,16 +240,38 @@ class ReviewViewModel : ViewModel() {
 
     // Delete review
     fun deleteReview(postId: String, callback: (Boolean) -> Unit) {
-        firestore.collection("posts").document(postId).delete()
-            .addOnSuccessListener {
-                Log.d("ReviewViewModel", "Review deleted successfully.")
-                callback(true)
+        firestore.collection("posts").document(postId).get()
+            .addOnSuccessListener { document ->
+                val imageUrl = document.getString("imageUrl")
+                // Delete the review document
+                firestore.collection("posts").document(postId).delete()
+                    .addOnSuccessListener {
+                        Log.d("ReviewViewModel", "Review deleted successfully.")
+                        // If the review has an associated image, delete it from Cloudinary
+                        if (!imageUrl.isNullOrEmpty()) {
+                            deleteReviewImage(imageUrl) { success ->
+                                if (success) {
+                                    Log.d("ReviewViewModel", "Image deleted from Cloudinary.")
+                                } else {
+                                    Log.e("ReviewViewModel", "Failed to delete image from Cloudinary.")
+                                }
+                            }
+                        }
+                        // Update local reviews LiveData
+                        _reviews.value = _reviews.value?.filterNot { it["postId"] == postId }
+                        callback(true)
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("ReviewViewModel", "Failed to delete review: $exception")
+                        callback(false)
+                    }
             }
             .addOnFailureListener { exception ->
-                Log.e("ReviewViewModel", "Failed to delete review: $exception")
+                Log.e("ReviewViewModel", "Failed to fetch review for deletion: $exception")
                 callback(false)
             }
     }
+
 
     // Fetch a single review
     fun fetchReview(postId: String, callback: (Map<String, Any>?) -> Unit) {

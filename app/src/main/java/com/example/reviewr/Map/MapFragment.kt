@@ -95,8 +95,8 @@ class MapFragment : Fragment() {
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 Snackbar.make(binding.root, "Location permission is required to show your location on the map.", Snackbar.LENGTH_INDEFINITE).setAction("Grant") {
-                        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                    }.show()
+                    requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }.show()
             }
             else -> {
                 requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -178,15 +178,17 @@ class MapFragment : Fragment() {
         }
     }
 
-    // Updating the markers on the map
+    private val clickedState = mutableMapOf<String, Boolean>() // Track if InfoWindow was clicked
+
     private fun updateMapMarkers(reviews: List<Map<String, Any>>) {
-        // Remove only review markers but keep the user's location marker
+        // Ensure we only clear review-specific markers
         mapView.overlays.removeAll { overlay ->
-            overlay is Marker && overlay.title != "You are here" // Keep user location marker
+            overlay is Marker && overlay.relatedObject != "UserLocation" // Preserve user location marker
         }
 
         // Add markers for reviews
         for (review in reviews) {
+            val postId = review["postId"] as? String ?: continue
             val location = review["location"] as? Map<String, Double> ?: continue
             val latitude = location["latitude"] ?: continue
             val longitude = location["longitude"] ?: continue
@@ -203,25 +205,30 @@ class MapFragment : Fragment() {
                 position = GeoPoint(latitude, longitude)
                 this.title = title
                 icon = markerIcon
+                relatedObject = postId // Associate postId with the marker
 
                 setOnMarkerClickListener { clickedMarker, _ ->
+                    val postId = clickedMarker.relatedObject as? String ?: return@setOnMarkerClickListener true
                     if (clickedMarker.infoWindow != null && clickedMarker.isInfoWindowOpen) {
-                        // If the InfoWindow is already open, proceed to show the dialog
-                        showReviewDialog(review["postId"] as String)
+                        showReviewDialog(postId)
                     } else {
-                        // Show the title by displaying the InfoWindow
                         clickedMarker.showInfoWindow()
                     }
-                    true // Consume the click event
+                    true
                 }
             }
 
-
             mapView.overlays.add(marker)
+            Log.d("MapFragment", "Review marker added: $title at $latitude, $longitude")
         }
 
         mapView.invalidate() // Refresh the map
+        Log.d("MapFragment", "Final overlays after adding reviews: ${mapView.overlays.size}")
     }
+
+
+
+
 
     // Activating the long press on the map in order to add a review
     private fun setupLongPressListener() {
@@ -299,7 +306,7 @@ class MapFragment : Fragment() {
                     setOnMarkerClickListener { clickedMarker, _ ->
                         if (clickedMarker.infoWindow != null && clickedMarker.isInfoWindowOpen) {
                             // If the InfoWindow is already open, proceed to show the dialog
-                            showReviewDialog(review["postId"] as String)
+                            showReviewDialog(postId)
                         } else {
                             // Show the title by displaying the InfoWindow
                             clickedMarker.showInfoWindow()
@@ -379,20 +386,26 @@ class MapFragment : Fragment() {
         super.onResume()
         mapView.onResume()
 
-        // Ensure all markers are restored
-        reviewMarkers.values.forEach { marker ->
-            if (!mapView.overlays.contains(marker)) {
-                mapView.overlays.add(marker)
-            }
+        // Reset map overlays
+        reviewViewModel.reviews.value?.let { reviews ->
+            updateMapMarkers(reviews)
         }
-        mapView.invalidate()
 
-        showUserLocation()
+        showUserLocation() // Ensure user location is also updated
+        mapView.invalidate()
     }
+
+
+
 
     override fun onPause() {
         super.onPause()
         mapView.onPause()
+
+        // Optionally, clear non-user-location markers
+        mapView.overlays.removeAll { overlay ->
+            overlay is Marker && overlay.title != "You are here"
+        }
     }
 
     override fun onDestroyView() {

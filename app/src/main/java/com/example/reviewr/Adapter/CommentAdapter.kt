@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.reviewr.R
 
 class CommentAdapter(
-    private val comments: List<Map<String, Any>>,
+    var comments: MutableList<Map<String, Any>>,
     private val onEditClicked: ((Map<String, Any>) -> Unit)? = null,
     private val onDeleteClicked: ((String) -> Unit)? = null,
     private val onCommentClicked: ((String) -> Unit)? = null // NEW CALLBACK
