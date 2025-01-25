@@ -95,8 +95,8 @@ class MapFragment : Fragment() {
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 Snackbar.make(binding.root, "Location permission is required to show your location on the map.", Snackbar.LENGTH_INDEFINITE).setAction("Grant") {
-                        requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                    }.show()
+                    requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }.show()
             }
             else -> {
                 requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)

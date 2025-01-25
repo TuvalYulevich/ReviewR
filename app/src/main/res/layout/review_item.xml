@@ -32,25 +32,41 @@
         android:layout_height="wrap_content"
         android:textSize="14sp" />
 
+    <TextView
+        android:id="@+id/reviewTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="#888888" />
+
+    <TextView
+        android:id="@+id/reviewEditedTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="#888888"
+        android:visibility="gone" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="8dp">
 
+
         <Button
             android:id="@+id/editButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Edit" />
+            android:text="Edit ✏️" />
 
         <Button
             android:id="@+id/deleteButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Delete"
+            android:text="Delete 🗑️"
             android:layout_marginStart="8dp" />
     </LinearLayout>
 </LinearLayout>

@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Filter Options"
+        android:text="Filter Options 🔍"
         android:textSize="18sp"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"/>
@@ -31,27 +31,27 @@
         android:id="@+id/applyButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Apply Filters"
+        android:text="Apply Filters 📊"
         android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/showAllButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Show All Reviews"
+        android:text="Show All Reviews 🟢"
         android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/hideAllButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hide All Reviews"
+        android:text="Hide All Reviews 🔴"
         android:layout_marginBottom="8dp"/>
 
     <Button
         android:id="@+id/goBackButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go Back"/>
+        android:text="Go Back 🔙"/>
 
 </LinearLayout>

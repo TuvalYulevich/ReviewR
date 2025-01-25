@@ -11,6 +11,7 @@ import com.example.reviewr.R
 import com.example.reviewr.databinding.MainUserFragmentBinding
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.reviewr.Utils.NetworkUtils
 import com.example.reviewr.Map.SearchDialogFragment
 import com.example.reviewr.ViewModel.ReviewViewModel
@@ -32,6 +33,13 @@ class MainUserFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+        //Load background image with Glide
+        val backgroundImageUrl = "https://res.cloudinary.com/dm8sulfig/image/upload/v1737723782/RegisterImage_h6uyi2.png" // Replace with your image URL
+        Glide.with(this)
+        .load(backgroundImageUrl)
+        .into(binding.backgroundImageView)
+
         // Initialize ViewModel
         userViewModel = ViewModelProvider(this).get(UserViewModel::class.java)
 
@@ -39,7 +47,7 @@ class MainUserFragment : Fragment() {
         val currentUser = userViewModel.getCurrentUser()
         if (currentUser != null) {
             val username = currentUser.displayName ?: currentUser.email ?: "User"
-            binding.welcomeMessage.text = "Welcome to ReviewR, $username!"
+            binding.welcomeMessage.text = "Welcome to ReviewR!"
         } else {
             Toast.makeText(requireContext(), "No user logged in.", Toast.LENGTH_SHORT).show()
             findNavController().navigate(R.id.action_mainUserFragment_to_welcomeFragment)
