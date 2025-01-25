@@ -5,78 +5,99 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#F5F5F5"
     tools:context=".User.MainUserFragment">
 
-    <TextView
-        android:id="@+id/mainTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp" />
-
+    <!-- Welcome Message -->
     <TextView
         android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Welcome to ReviewR!"
-        android:textSize="18sp"
+        android:textSize="22sp"
         android:textStyle="bold"
+        android:textColor="#03A9F4"
+        android:layout_marginTop="32dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="24dp"
-        android:layout_marginStart="16dp" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- Main Title -->
+    <TextView
+        android:id="@+id/mainTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Explore Your Options Below"
+        android:textSize="18sp"
+        android:textStyle="normal"
+        android:textColor="#333333"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/welcomeMessage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Map Button -->
     <Button
         android:id="@+id/mapButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Map"
-        android:layout_marginTop="16dp"
+        android:text="Map  🗺️"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/mainTitle"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
 
+    <!-- Search Reviews Button -->
     <Button
         android:id="@+id/searchReviewsButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Search Reviews"
+        android:text="Search Reviews  🔍"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/mapButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
 
+    <!-- View My Information Button -->
     <Button
         android:id="@+id/viewMyInfoButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="View My Information"
+        android:text="View My Information  👀"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/searchReviewsButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
 
+    <!-- Logout Button -->
     <Button
         android:id="@+id/logoutButton"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Logout"
+        android:text="Logout  🔙"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/viewMyInfoButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp" />
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,7 +1,8 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F5F5F5">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,30 +13,37 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit Personal Details"
-            android:textSize="18sp"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold" />
+            android:text="Edit Personal Details ✏️"
+            android:textSize="20sp"
+            android:textColor="#03A9F4"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp" />
 
         <EditText
             android:id="@+id/usernameInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Username" />
+            android:hint="Username"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/firstNameInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="First Name"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/lastNameInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Last Name"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/ageInput"
@@ -43,31 +51,39 @@
             android:layout_height="wrap_content"
             android:hint="Age"
             android:inputType="number"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <Button
             android:id="@+id/saveUserDetailsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Personal Details"
+            android:text="Save Personal Details 📥"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="24dp" />
 
         <!-- Change Email Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Change Email"
-            android:textSize="18sp"
+            android:text="Change Email ✏️"
+            android:textSize="20sp"
+            android:textColor="#03A9F4"
+            android:textStyle="bold"
             android:layout_marginTop="32dp"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="16dp" />
 
         <EditText
             android:id="@+id/emailInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="New Email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/passwordInput"
@@ -75,31 +91,39 @@
             android:layout_height="wrap_content"
             android:hint="Current Password (required for email change)"
             android:inputType="textPassword"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <Button
             android:id="@+id/saveEmailButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Email"
+            android:text="Save Email 📥"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="24dp" />
 
         <!-- Change Password Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Change Password"
-            android:textSize="18sp"
+            android:text="Change Password ✏️"
+            android:textSize="20sp"
+            android:textColor="#03A9F4"
+            android:textStyle="bold"
             android:layout_marginTop="32dp"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="16dp" />
 
         <EditText
             android:id="@+id/currentPasswordInput"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Current Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <EditText
             android:id="@+id/newPasswordInput"
@@ -107,37 +131,48 @@
             android:layout_height="wrap_content"
             android:hint="New Password"
             android:inputType="textPassword"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:background="@drawable/rounded_input_background"
+            android:padding="12dp" />
 
         <Button
             android:id="@+id/savePasswordButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Password"
+            android:text="Save Password 📥"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="24dp" />
 
         <!-- Edit Profile Picture Section -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit Profile Picture"
-            android:textSize="18sp"
+            android:text="Edit Profile Picture ✏️"
+            android:textSize="20sp"
+            android:textColor="#03A9F4"
+            android:textStyle="bold"
             android:layout_marginTop="32dp"
-            android:layout_marginBottom="8dp"
-            android:textStyle="bold" />
+            android:layout_marginBottom="16dp" />
 
         <Button
             android:id="@+id/uploadProfilePictureButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Upload a New Profile Picture"
-            android:layout_marginTop="8dp" />
+            android:text="Upload a New Profile Picture 📷"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/deleteProfilePictureButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Delete Current Profile Picture"
+            android:text="Delete Current Profile Picture 🗑️"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="16dp" />
 
         <!-- Go Back Button -->
@@ -145,7 +180,10 @@
             android:id="@+id/goBackButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Go Back"
+            android:text="Go Back 🔙"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
             android:layout_marginTop="32dp" />
     </LinearLayout>
 </ScrollView>

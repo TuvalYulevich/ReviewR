@@ -203,11 +203,19 @@ class MapFragment : Fragment() {
                 position = GeoPoint(latitude, longitude)
                 this.title = title
                 icon = markerIcon
-                setOnMarkerClickListener { _, _ ->
-                    showReviewDialog(review["postId"] as String) // Trigger review dialog
+
+                setOnMarkerClickListener { clickedMarker, _ ->
+                    if (clickedMarker.infoWindow != null && clickedMarker.isInfoWindowOpen) {
+                        // If the InfoWindow is already open, proceed to show the dialog
+                        showReviewDialog(review["postId"] as String)
+                    } else {
+                        // Show the title by displaying the InfoWindow
+                        clickedMarker.showInfoWindow()
+                    }
                     true // Consume the click event
                 }
             }
+
 
             mapView.overlays.add(marker)
         }
@@ -288,11 +296,18 @@ class MapFragment : Fragment() {
                     position = GeoPoint(latitude, longitude)
                     this.title = title
                     icon = markerIcon
-                    setOnMarkerClickListener { _, _ ->
-                        showReviewDialog(postId) // Trigger review dialog
+                    setOnMarkerClickListener { clickedMarker, _ ->
+                        if (clickedMarker.infoWindow != null && clickedMarker.isInfoWindowOpen) {
+                            // If the InfoWindow is already open, proceed to show the dialog
+                            showReviewDialog(review["postId"] as String)
+                        } else {
+                            // Show the title by displaying the InfoWindow
+                            clickedMarker.showInfoWindow()
+                        }
                         true // Consume the click event
                     }
                 }
+
                 mapView.overlays.add(marker)
                 reviewMarkers[postId] = marker
                 Log.d("MapFragment", "Review marker added: $title at $latitude, $longitude")

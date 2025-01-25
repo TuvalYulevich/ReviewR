@@ -1,78 +1,91 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F5F5F5">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
 
+        <!-- Profile Picture -->
+        <ImageView
+            android:id="@+id/profilePicture"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Profile Picture"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_foreground" />
+
+        <!-- User Information -->
         <TextView
             android:id="@+id/usernameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Username: "
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle=""
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/firstNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="First Name: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/lastNameText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Last Name: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/emailText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/ageText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Age: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/reviewCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Reviews: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:id="@+id/commentCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Comments: "
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:layout_marginBottom="16dp" />
 
-        <ImageView
-            android:id="@+id/profilePicture"
-            android:layout_width="250dp"
-            android:layout_height="250dp"
-            android:layout_marginBottom="16dp"
-            android:contentDescription="Profile Picture"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_foreground"
-            android:layout_gravity="center" />
-
+        <!-- Go Back Button -->
         <Button
             android:id="@+id/goBackButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Go Back"
-            android:layout_marginTop="16dp" />
+            android:text="Go Back 🔙"
+            android:textSize="18sp"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF" />
     </LinearLayout>
 </ScrollView>

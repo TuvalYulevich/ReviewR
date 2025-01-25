@@ -4,39 +4,68 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="#F5F5F5">
 
+    <!-- Title -->
+    <TextView
+        android:id="@+id/userInfoTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Information"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#03A9F4"
+        android:layout_marginBottom="24dp"
+        android:gravity="center" />
+
+    <!-- Buttons -->
     <Button
         android:id="@+id/viewUserDataButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View My User Data"
+        android:text="View My User Data 📑"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/editPersonalDetailsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit My Personal Details"
+        android:text="Edit My Personal Details ✏️"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/editMyReviewsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit My Reviews"
+        android:text="Edit My Reviews ✏️"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginBottom="16dp" />
 
     <Button
         android:id="@+id/editMyCommentsButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Edit My Comments" />
+        android:text="Edit My Comments ✏️"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF" />
 
     <Button
         android:id="@+id/goBackButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go Back"
+        android:text="Go Back 🔙"
+        android:textSize="18sp"
+        android:background="@drawable/rounded_background"
+        android:textColor="#FFFFFF"
         android:layout_marginTop="32dp" />
 </LinearLayout>

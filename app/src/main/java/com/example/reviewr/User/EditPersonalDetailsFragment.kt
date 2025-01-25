@@ -44,6 +44,9 @@ class EditPersonalDetailsFragment : Fragment() {
             binding.ageInput.setText(userDetails["age"] as? String ?: "")
             binding.emailInput.setText(userDetails["email"] as? String ?: "")
             binding.passwordInput.setText(userDetails["password"] as? String ?: "")
+
+            binding.emailInput.text?.clear()
+            binding.passwordInput.text?.clear()
         }
 
         // Save personal details button
