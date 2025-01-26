@@ -14,7 +14,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.reviewr.Data.AppDatabase
-import com.example.reviewr.Data.AppImageDao
 import com.example.reviewr.Utils.NetworkUtils
 import com.example.reviewr.Map.SearchDialogFragment
 import com.example.reviewr.ViewModel.ReviewViewModel
