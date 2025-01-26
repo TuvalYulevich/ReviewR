@@ -9,7 +9,7 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 // Setting up the app database
-@Database(entities = [UserEntity::class, AppImageEntity:: class], version = 4, exportSchema = false)
+@Database(entities = [UserEntity::class, AppImageEntity:: class], version = 5, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun appImageDao(): AppImageDao
@@ -39,6 +39,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        // Migration from version 4 to version 5: Add App image key column
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE appImage_urls ADD COLUMN key TEXT NOT NULL DEFAULT ''")
+            }
+        }
+
 
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -49,7 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
                         AppDatabase::class.java,
                         "app_database"
                     )
-                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4) // Add all migrations
+                        .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5) // Add all migrations
                         .build()
                     INSTANCE = instance
                     Log.d("AppDatabase", "Database initialized successfully")

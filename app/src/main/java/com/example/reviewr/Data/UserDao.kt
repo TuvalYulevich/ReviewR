@@ -7,7 +7,7 @@ import androidx.room.*
 interface UserDao {
 
     // Query to fetch a user by ID
-    @Query("SELECT * FROM users WHERE userId = :userId LIMIT 1")
+    @Query("SELECT * FROM users WHERE userId = :userId")
     fun getUser(userId: String): UserEntity?
 
     // Insert or update a user

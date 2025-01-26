@@ -289,8 +289,15 @@ class UserViewModel (application: Application) : AndroidViewModel(application) {
             val imageCollection = firestore.collection("appImages")
             val snapshot = imageCollection.get().await()
             // Fetch all image URLs from Firestore and map them to AppImageEntity
-            val imageUrls = snapshot.documents.mapNotNull { document ->
-                document.getString("appImageUrl")?.let { url -> AppImageEntity(url = url) }
+            val imageUrls = snapshot.documents.mapIndexedNotNull { index, document ->
+                document.getString("appImageUrl")?.let { url ->
+                    val key = when (index) {
+                        0 -> "backgroundImage" // Assign a stable key for each image
+                        1 -> "DataImage"
+                        else -> "otherImage$index"
+                    }
+                    AppImageEntity(key = key, url = url)
+                }
             }
             // Access the database and perform operations
             val database = AppDatabase.getInstance(context)
