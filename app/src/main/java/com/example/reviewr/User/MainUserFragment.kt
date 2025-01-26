@@ -18,6 +18,7 @@ import com.example.reviewr.Utils.NetworkUtils
 import com.example.reviewr.Map.SearchDialogFragment
 import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.ViewModel.UserViewModel
+import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -87,38 +88,98 @@ class MainUserFragment : Fragment() {
 
         // Set up the search button click listener (Search is allowed only if the app is connected to the internet)
         binding.searchReviewsButton.setOnClickListener {
-            if (NetworkUtils.isOnline(requireContext())){
-            val dialog = SearchDialogFragment { filters ->
-                when (filters["action"]) {
-                    "showAll" -> {
-                        // Fetch all reviews and navigate to SearchResultsFragment
-                        reviewViewModel.fetchAllReviews() // Use a method specifically for fetching all reviews
-                        findNavController().navigate(
-                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
-                        )
-                    }
-                    "applyFilters" -> {
-                        // Apply filters and navigate to SearchResultsFragment
-                        reviewViewModel.applyFilters2(filters)
-                        findNavController().navigate(
-                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
-                        )
+            if (NetworkUtils.isOnline(requireContext())) {
+                val dialog = SearchDialogFragment { filters ->
+                    val stringFilters = filters.mapValues { it.value.toString() } // Convert Map<String, Any> to Map<String, String>
+                    val within500Meters = stringFilters["within500Meters"]?.toBoolean() ?: false
+                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+                    when (stringFilters["action"]) {
+                        "showAll" -> {
+                            if (within500Meters) {
+                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                    if (location != null) {
+                                        reviewViewModel.applyFilters2(stringFilters, location) // Pass Map<String, String>
+                                        reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
+                                            if (reviews.isNotEmpty()) {
+                                                findNavController().navigate(
+                                                    MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                                                )
+                                            } else {
+                                                Toast.makeText(
+                                                    requireContext(),
+                                                    "No reviews found within 500 meters.",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    } else {
+                                        Toast.makeText(requireContext(), "Unable to retrieve location.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }.addOnFailureListener {
+                                    Toast.makeText(requireContext(), "Failed to retrieve location.", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                reviewViewModel.fetchAllReviews()
+                                reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
+                                    if (reviews.isNotEmpty()) {
+                                        findNavController().navigate(
+                                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                                        )
+                                    } else {
+                                        Toast.makeText(requireContext(), "No reviews found.", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                        }
+
+                        "applyFilters" -> {
+                            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                if (location != null) {
+                                    reviewViewModel.applyFilters2(stringFilters, location) // Pass Map<String, String>
+                                    reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
+                                        if (reviews.isNotEmpty()) {
+                                            findNavController().navigate(
+                                                MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                                            )
+                                        } else {
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "No matching reviews found.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(requireContext(), "Unable to retrieve location.", Toast.LENGTH_SHORT).show()
+                                }
+                            }.addOnFailureListener {
+                                Toast.makeText(requireContext(), "Failed to retrieve location.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
                     }
                 }
-            }
-            dialog.show(parentFragmentManager, "SearchDialog")
-        }
-            else{
+                dialog.show(parentFragmentManager, "SearchDialog")
+            } else {
                 Toast.makeText(requireContext(), "You cannot search when offline.", Toast.LENGTH_SHORT).show()
             }
         }
+
+
+
+
+
+
+
+
+
+
 
         // Navigate to view user information
         binding.viewMyInfoButton.setOnClickListener {
             findNavController().navigate(R.id.action_mainUserFragment_to_viewUserInformationFragment)
         }
 
-        // Logout interface
         // Logout interface
         binding.logoutButton.setOnClickListener {
             val currentUser = userViewModel.getCurrentUser()

@@ -1,5 +1,6 @@
 package com.example.reviewr.ViewModel
 
+import android.location.Location
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -123,7 +124,8 @@ class ReviewViewModel : ViewModel() {
         firestore.collection("posts").get()
             .addOnSuccessListener { snapshot ->
                 val allReviews = snapshot.documents.mapNotNull { it.data }
-                _filteredReviews.value = allReviews // Set all reviews to filteredReviews LiveData
+               // _filteredReviews.value = allReviews // Set all reviews to filteredReviews LiveData
+                _filteredReviews.postValue(allReviews)
             }
             .addOnFailureListener { exception ->
                 Log.e("ReviewViewModel", "Failed to fetch all reviews: $exception")
@@ -319,24 +321,50 @@ class ReviewViewModel : ViewModel() {
     }
 
     // Apply filters for "Search" feature in MainUserScreen
-    fun applyFilters2(filters: Map<String, String>) {
-        var query: Query = firestore.collection("posts")
-        filters["status"]?.let { status ->
-            if (status != "All") query = query.whereEqualTo("status", status)
+    fun applyFilters2(filters: Map<String, String>, userLocation: Location) {
+        val within500Meters = filters["within500Meters"]?.toString()?.toBoolean() ?: false
+        if (within500Meters) {
+            firestore.collection("posts").get()
+                .addOnSuccessListener { snapshot ->
+                    val filteredReviews = snapshot.documents.mapNotNull { document ->
+                        val location = document.get("location") as? Map<String, Double>
+                        val latitude = location?.get("latitude")
+                        val longitude = location?.get("longitude")
+                        if (latitude != null && longitude != null) {
+                            val distance = calculateDistance(
+                                userLocation.latitude, userLocation.longitude,
+                                latitude, longitude
+                            )
+                            if (distance <= 500) document.data else null
+                        } else {
+                            null
+                        }
+                    }
+                    _filteredReviews.postValue(filteredReviews)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("ReviewViewModel", "Error applying filters: $exception")
+                    _filteredReviews.postValue(emptyList())
+                }
+        } else {
+            fetchAllReviews() // Fallback: fetch all reviews if no filtering is needed
         }
-        filters["category"]?.let { category ->
-            if (category != "All") query = query.whereEqualTo("category", category)
-        }
-        query.get()
-            .addOnSuccessListener { snapshot ->
-                val filteredResults = snapshot.documents.mapNotNull { it.data }
-                _filteredReviews.value = filteredResults // Set filtered reviews
-            }
-            .addOnFailureListener { exception ->
-                Log.e("ReviewViewModel", "Error applying filters: $exception")
-                _filteredReviews.value = emptyList()
-            }
     }
+
+
+    fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val earthRadius = 6371000.0 // meters
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+
+        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2)
+        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+        return earthRadius * c
+    }
+
+
 
 
 
