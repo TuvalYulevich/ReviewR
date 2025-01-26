@@ -15,5 +15,8 @@ interface AppImageDao {
     @Query("DELETE FROM appImage_urls")
     fun clearTable()
 
+    @Query("SELECT * FROM appImage_urls WHERE `key` = :imageKey LIMIT 1")
+    fun getImageByKey(imageKey: String): AppImageEntity?
+
 }
 

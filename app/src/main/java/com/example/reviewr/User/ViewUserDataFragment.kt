@@ -32,11 +32,11 @@ class ViewUserDataFragment : Fragment() {
 
         // Fetch personal details, including the profile picture
         userViewModel.fetchUserDetails(userId) { userDetails ->
-            binding.usernameText.text = "Username: ${userDetails["username"] ?: "N/A"}"
-            binding.firstNameText.text = "First Name: ${userDetails["firstName"] ?: "N/A"}"
-            binding.lastNameText.text = "Last Name: ${userDetails["lastName"] ?: "N/A"}"
-            binding.emailText.text = "Email: ${userDetails["email"] ?: "N/A"}"
-            binding.ageText.text = "Age: ${userDetails["age"] ?: "N/A"}"
+            binding.usernameText.text = " ${userDetails["username"] ?: "N/A"}"
+            binding.firstNameText.text = " ${userDetails["firstName"] ?: "N/A"}"
+            binding.lastNameText.text = " ${userDetails["lastName"] ?: "N/A"}"
+            binding.emailText.text = " ${userDetails["email"] ?: "N/A"}"
+            binding.ageText.text = " ${userDetails["age"] ?: "N/A"}"
 
             // Load the profile picture to the UI using Glide
             val profilePictureUrl = userDetails["profilePictureUrl"] as? String
@@ -54,10 +54,10 @@ class ViewUserDataFragment : Fragment() {
 
         // Fetch review and comment counts
         userViewModel.fetchReviewCount(userId) { count ->
-            binding.reviewCountText.text = "Reviews: $count"
+            binding.reviewCountText.text = " $count"
         }
         userViewModel.fetchCommentCount(userId) { count ->
-            binding.commentCountText.text = "Comments: $count"
+            binding.commentCountText.text = " $count"
         }
 
         // Go Back button
