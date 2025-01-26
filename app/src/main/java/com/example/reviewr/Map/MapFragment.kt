@@ -151,19 +151,33 @@ class MapFragment : Fragment() {
             R.id.filterButton -> {
                 val dialog = FilterDialogFragment { action, filters ->
                     when (action) {
-                        "applyFilters" -> { // Apply filters for the "Filter" button
-                            filters?.let { reviewViewModel.applyFilters(it) { filteredReviews ->
-                                updateMapMarkers(filteredReviews)
-                            } }
+                        "applyFilters" -> {
+                            filters?.let {
+                                applyFiltersWithDistance(it)
+                            }
                         }
                         "showAll" -> {
-                            reviewViewModel.fetchReviews() // Fetch all reviews
-                            reviewViewModel.reviews.observe(viewLifecycleOwner) { allReviews ->
-                                updateMapMarkers(allReviews) // Update the map with all reviews
+                            filters?.let {
+                                val within500Meters = it["within500Meters"] as? Boolean ?: false
+                                if (within500Meters) {
+                                    showMarkersWithinDistance(500.0)
+                                } else {
+                                    reviewViewModel.fetchReviews()
+                                    reviewViewModel.reviews.observe(viewLifecycleOwner) { allReviews ->
+                                        updateMapMarkers(allReviews)
+                                    }
+                                }
                             }
                         }
                         "hideAll" -> {
-                            updateMapMarkers(emptyList()) // Clear all markers
+                            filters?.let {
+                                val within500Meters = it["within500Meters"] as? Boolean ?: false
+                                if (within500Meters) {
+                                    removeMarkersWithinDistance(500.0)
+                                } else {
+                                    updateMapMarkers(emptyList())
+                                }
+                            }
                         }
                     }
                 }
@@ -177,6 +191,102 @@ class MapFragment : Fragment() {
             else -> false
         }
     }
+
+    private fun applyFiltersWithDistance(filters: Map<String, Any>) {
+        val within500Meters = filters["within500Meters"] as? Boolean ?: false
+        val filteredFilters = filters.filter { it.key != "within500Meters" } // Remove "within500Meters" from the filters map
+
+        reviewViewModel.applyFilters(filteredFilters as Map<String, String>) { filteredReviews ->
+            if (within500Meters) {
+                getCurrentUserLocation { userLocation ->
+                    if (userLocation != null) {
+                        val reviewsWithinDistance = filteredReviews.filter { review ->
+                            val location = review["location"] as? Map<String, Double> ?: return@filter false
+                            val latitude = location["latitude"] ?: return@filter false
+                            val longitude = location["longitude"] ?: return@filter false
+                            val distance = calculateDistance(userLocation, GeoPoint(latitude, longitude))
+                            distance <= 500.0
+                        }
+                        updateMapMarkers(reviewsWithinDistance)
+                    } else {
+                        updateMapMarkers(emptyList()) // Clear markers if location is unavailable
+                    }
+                }
+            } else {
+                updateMapMarkers(filteredReviews)
+            }
+        }
+    }
+
+
+
+    private fun showMarkersWithinDistance(distance: Double) {
+        getCurrentUserLocation { userLocation ->
+            if (userLocation != null) {
+                val reviews = reviewViewModel.reviews.value ?: emptyList()
+                val filteredReviews = reviews.filter { review ->
+                    val location = review["location"] as? Map<String, Double> ?: return@filter false
+                    val latitude = location["latitude"] ?: return@filter false
+                    val longitude = location["longitude"] ?: return@filter false
+                    calculateDistance(userLocation, GeoPoint(latitude, longitude)) <= distance
+                }
+                updateMapMarkers(filteredReviews)
+            } else {
+                updateMapMarkers(emptyList()) // Clear markers if location is unavailable
+            }
+        }
+    }
+
+
+    private fun removeMarkersWithinDistance(distance: Double) {
+        getCurrentUserLocation { userLocation ->
+            if (userLocation != null) {
+                val overlaysToRemove = mapView.overlays.filter { overlay ->
+                    overlay is Marker && overlay.relatedObject != "UserLocation" &&
+                            calculateDistance(userLocation, overlay.position) <= distance
+                }
+                mapView.overlays.removeAll(overlaysToRemove)
+                mapView.invalidate()
+            } else {
+                Snackbar.make(binding.root, "Unable to determine your location. Cannot remove markers.", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+
+    private fun getCurrentUserLocation(onLocationReady: (GeoPoint?) -> Unit) {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                onLocationReady(GeoPoint(location.latitude, location.longitude))
+            } else {
+                Log.e("MapFragment", "Location is null.")
+                Snackbar.make(binding.root, "Unable to determine your location.", Snackbar.LENGTH_SHORT).show()
+                onLocationReady(null) // Pass null if location is unavailable
+            }
+        }.addOnFailureListener { exception ->
+            Log.e("MapFragment", "Failed to retrieve location: ${exception.message}", exception)
+            Snackbar.make(binding.root, "Failed to retrieve your location.", Snackbar.LENGTH_SHORT).show()
+            onLocationReady(null) // Pass null on failure
+        }
+    }
+
+
+    private fun calculateDistance(point1: GeoPoint, point2: GeoPoint): Double {
+        val results = FloatArray(1)
+        android.location.Location.distanceBetween(
+            point1.latitude, point1.longitude,
+            point2.latitude, point2.longitude,
+            results
+        )
+        return results[0].toDouble() // Return distance in meters
+    }
+
+
+
+
+
+
+
 
     private val clickedState = mutableMapOf<String, Boolean>() // Track if InfoWindow was clicked
 

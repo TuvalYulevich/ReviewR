@@ -48,6 +48,14 @@
         android:text="Hide All Reviews 🔴"
         android:layout_marginBottom="8dp"/>
 
+    <CheckBox
+        android:id="@+id/within500MetersCheckbox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Within 500 meters"
+        android:layout_marginBottom="16dp" />
+
+
     <Button
         android:id="@+id/goBackButton"
         android:layout_width="match_parent"
