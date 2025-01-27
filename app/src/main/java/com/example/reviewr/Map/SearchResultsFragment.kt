@@ -35,17 +35,21 @@ class SearchResultsFragment : Fragment() {
         val goBackButton = view.findViewById<Button>(R.id.goBackButton)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
-        // Observe filteredReviews to update RecyclerView
+
+        val adapter = ReviewAdapter(
+            reviews = mutableListOf(),
+            showEditDeleteButtons = false,
+            onItemClicked = { postId ->
+                val action = SearchResultsFragmentDirections.actionSearchResultsFragmentToViewReviewFragment(postId)
+                findNavController().navigate(action)
+            }
+        )
+        recyclerView.adapter = adapter
+
+        // Observe filteredReviews
         reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
-            val adapter = ReviewAdapter(
-                reviews = reviews.toMutableList(),
-                showEditDeleteButtons = false, // Hide edit/delete buttons
-                onItemClicked = { postId ->
-                    val action = SearchResultsFragmentDirections.actionSearchResultsFragmentToViewReviewFragment(postId)
-                    findNavController().navigate(action)
-                }
-            )
-            recyclerView.adapter = adapter
+            adapter.reviews = reviews.toMutableList()
+            adapter.notifyDataSetChanged()
         }
 
         // Go back functionality

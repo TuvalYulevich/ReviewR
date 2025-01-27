@@ -150,16 +150,17 @@ class ReviewViewModel : ViewModel() {
 
     // Fetch specific review details from Firestore
     fun fetchReviewDetails(postId: String) {
-        firestore.collection("posts").document(postId).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
+        firestore.collection("posts").document(postId)
+            .addSnapshotListener { document, error ->
+                if (error != null) {
+                    Log.e("ReviewViewModel", "Error listening to review changes", error)
+                    return@addSnapshotListener
+                }
+                if (document != null && document.exists()) {
                     _selectedReview.value = document.data
                 } else {
                     _selectedReview.value = null
                 }
-            }
-            .addOnFailureListener {
-                _selectedReview.value = null
             }
     }
 

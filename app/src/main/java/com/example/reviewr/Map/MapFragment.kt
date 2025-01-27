@@ -64,7 +64,14 @@ class MapFragment : Fragment() {
 
         // Observe reviews from ViewModel
         reviewViewModel.reviews.observe(viewLifecycleOwner) { reviews ->
-            displayReviewsOnMap(reviews)
+          displayReviewsOnMap(reviews)
+        }
+
+        // Replace the current reviews observer with this:
+        reviewViewModel.reviews.observe(viewLifecycleOwner) { reviews ->
+            Log.d("MapFragment", "Reviews updated: ${reviews.size}")
+            updateMapMarkers(reviews)
+            showUserLocation() // Ensure user location marker stays on top
         }
 
         // Fetch reviews from Firestore
@@ -317,15 +324,32 @@ class MapFragment : Fragment() {
                 icon = markerIcon
                 relatedObject = postId // Associate postId with the marker
 
+                var lastClickedMarker: Marker? = null // Track the last clicked marker
+                var lastClickedPostId: String? = null // Track the last clicked postId for safety
+
                 setOnMarkerClickListener { clickedMarker, _ ->
                     val postId = clickedMarker.relatedObject as? String ?: return@setOnMarkerClickListener true
-                    if (clickedMarker.infoWindow != null && clickedMarker.isInfoWindowOpen) {
-                        showReviewDialog(postId)
-                    } else {
-                        clickedMarker.showInfoWindow()
+
+                    // Case 1: Clicking the same marker with its InfoWindow already open
+                    if (lastClickedMarker == clickedMarker && clickedMarker.isInfoWindowOpen) {
+                        showReviewDialog(postId) // Navigate to the review dialog
+                        // Reset the tracking state after showing the dialog
+                        lastClickedMarker = null
+                        lastClickedPostId = null
+                        return@setOnMarkerClickListener true
                     }
-                    true
+
+                    // Case 2: Clicking a different marker or the same marker with InfoWindow closed
+                    clickedMarker.showInfoWindow() // Show the InfoWindow (title)
+
+                    // Update the last clicked marker
+                    lastClickedMarker = clickedMarker
+                    lastClickedPostId = postId
+
+                    true // Consume the click event
                 }
+
+
             }
 
             mapView.overlays.add(marker)
