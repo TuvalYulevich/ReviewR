@@ -12,7 +12,7 @@ class CommentViewModel : ViewModel() {
     private val firestore = FirebaseFirestore.getInstance()
     private val _comments = MutableLiveData<List<Map<String, Any>>>()
     val comments: LiveData<List<Map<String, Any>>> get() = _comments
-
+        //
     // Fetch single comment
     fun fetchComment(commentId: String, callback: (Map<String, Any>?) -> Unit) {
         firestore.collection("comments").document(commentId).get()
