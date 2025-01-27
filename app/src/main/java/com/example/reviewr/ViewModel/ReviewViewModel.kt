@@ -120,18 +120,45 @@ class ReviewViewModel : ViewModel() {
 
 
     // Fetch reviews
-    fun fetchAllReviews() {
-        firestore.collection("posts").get()
-            .addOnSuccessListener { snapshot ->
-                val allReviews = snapshot.documents.mapNotNull { it.data }
-               // _filteredReviews.value = allReviews // Set all reviews to filteredReviews LiveData
-                _filteredReviews.postValue(allReviews)
+    fun fetchFilteredReviews(filters: Map<String, String>? = null, userLocation: Location? = null) {
+        firestore.collection("posts").addSnapshotListener { snapshots, e ->
+            if (e != null) {
+                Log.e("ReviewViewModel", "Error fetching reviews: $e")
+                _filteredReviews.postValue(emptyList())
+                return@addSnapshotListener
             }
-            .addOnFailureListener { exception ->
-                Log.e("ReviewViewModel", "Failed to fetch all reviews: $exception")
-                _filteredReviews.value = emptyList()
-            }
+
+            val reviews = snapshots?.documents?.mapNotNull { document ->
+                val data = document.data ?: return@mapNotNull null
+
+                // Apply filters if provided
+                val matchesFilters = filters?.let { filterMap ->
+                    val matchesStatus = filterMap["status"]?.let { data["status"] == it } ?: true
+                    val matchesCategory = filterMap["category"]?.let { data["category"] == it } ?: true
+                    val withinDistance = filterMap["within500Meters"]?.toBoolean()?.let { within500 ->
+                        if (within500) {
+                            val location = data["location"] as? Map<String, Double>
+                            location?.let {
+                                val distance = calculateDistance(
+                                    userLocation!!.latitude,
+                                    userLocation.longitude,
+                                    it["latitude"] ?: 0.0,
+                                    it["longitude"] ?: 0.0
+                                )
+                                distance <= 500
+                            } ?: false
+                        } else true
+                    } ?: true
+                    matchesStatus && matchesCategory && withinDistance
+                } ?: true // No filters, show all reviews
+
+                if (matchesFilters) data else null
+            } ?: emptyList()
+
+            _filteredReviews.postValue(reviews)
+        }
     }
+
 
     // Fetch reviews from Firestore
     fun fetchReviews() {
@@ -322,35 +349,7 @@ class ReviewViewModel : ViewModel() {
     }
 
     // Apply filters for "Search" feature in MainUserScreen
-    fun applyFilters2(filters: Map<String, String>, userLocation: Location) {
-        val within500Meters = filters["within500Meters"]?.toString()?.toBoolean() ?: false
-        if (within500Meters) {
-            firestore.collection("posts").get()
-                .addOnSuccessListener { snapshot ->
-                    val filteredReviews = snapshot.documents.mapNotNull { document ->
-                        val location = document.get("location") as? Map<String, Double>
-                        val latitude = location?.get("latitude")
-                        val longitude = location?.get("longitude")
-                        if (latitude != null && longitude != null) {
-                            val distance = calculateDistance(
-                                userLocation.latitude, userLocation.longitude,
-                                latitude, longitude
-                            )
-                            if (distance <= 500) document.data else null
-                        } else {
-                            null
-                        }
-                    }
-                    _filteredReviews.postValue(filteredReviews)
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("ReviewViewModel", "Error applying filters: $exception")
-                    _filteredReviews.postValue(emptyList())
-                }
-        } else {
-            fetchAllReviews() // Fallback: fetch all reviews if no filtering is needed
-        }
-    }
+
 
 
     fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
