@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reviewr.CommentAdapter.CommentAdapter
 import com.example.reviewr.ViewModel.CommentViewModel
+import com.example.reviewr.ViewModel.ReviewViewModel
 import com.example.reviewr.databinding.EditMyCommentsFragmentBinding
 import com.google.firebase.auth.FirebaseAuth
 
@@ -20,6 +21,7 @@ class EditMyCommentsFragment : Fragment() {
     private var _binding: EditMyCommentsFragmentBinding? = null
     private val binding get() = _binding!!
     private lateinit var commentViewModel: CommentViewModel
+    private lateinit var reviewViewModel : ReviewViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,7 +35,7 @@ class EditMyCommentsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         commentViewModel = ViewModelProvider(requireActivity())[CommentViewModel::class.java]
-
+        reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
         binding.commentsRecyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return
@@ -70,10 +72,11 @@ class EditMyCommentsFragment : Fragment() {
                             }
                         }
                     },
-                    onCommentClicked = { postId -> // NEW NAVIGATION LOGIC
+                    onCommentClicked = { postId ->
                         val action = EditMyCommentsFragmentDirections.actionEditMyCommentsFragmentToViewReviewFragment(postId)
                         findNavController().navigate(action)
-                    }
+                    },
+                            reviewViewModel = reviewViewModel
                 )
                 binding.commentsRecyclerView.adapter = adapter
             }

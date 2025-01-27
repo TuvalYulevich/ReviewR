@@ -7,12 +7,15 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reviewr.R
+import com.example.reviewr.ViewModel.ReviewViewModel
+import com.google.firebase.firestore.FirebaseFirestore
 
 class CommentAdapter(
     var comments: MutableList<Map<String, Any>>,
     private val onEditClicked: ((Map<String, Any>) -> Unit)? = null,
     private val onDeleteClicked: ((String) -> Unit)? = null,
-    private val onCommentClicked: ((String) -> Unit)? = null // NEW CALLBACK
+    private val onCommentClicked: ((String) -> Unit)? = null, // NEW CALLBACK
+    private val reviewViewModel: ReviewViewModel  // Add ReviewViewModel parameter
 ) : RecyclerView.Adapter<CommentAdapter.CommentViewHolder>() {
 
     inner class CommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -20,7 +23,7 @@ class CommentAdapter(
         val description: TextView = itemView.findViewById(R.id.commentDescription)
         val username: TextView = itemView.findViewById(R.id.commentUsername)
         val time: TextView = itemView.findViewById(R.id.commentTime)
-        val editedTime: TextView = itemView.findViewById(R.id.commentEditedTime) // Add this line
+        val editedTime: TextView = itemView.findViewById(R.id.commentEditedTime)
         val editButton: Button? = itemView.findViewById(R.id.commentEditButton)
         val deleteButton: Button? = itemView.findViewById(R.id.commentDeleteButton)
     }
@@ -36,7 +39,34 @@ class CommentAdapter(
 
         holder.title.text = comment["title"] as? String ?: "No Title"
         holder.description.text = comment["description"] as? String ?: "No Description"
-        holder.username.text = comment["username"] as? String ?: "Anonymous"
+
+
+        // Get userId from comment and fetch live username
+        val userId = comment["userId"] as? String
+        if (userId != null) {
+            // Set up real-time listener for username
+            FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .addSnapshotListener { document, error ->
+                    if (error != null) {
+                        holder.username.text = "Anonymous"
+                        return@addSnapshotListener
+                    }
+
+                    if (document != null && document.exists()) {
+                        val username = document.getString("username") ?: "Anonymous"
+                        holder.username.text = username
+                    } else {
+                        holder.username.text = "Anonymous"
+                    }
+                }
+        } else {
+            holder.username.text = "Anonymous"
+        }
+
+
+
         val timestamp = comment["timestamp"] as? com.google.firebase.Timestamp
         holder.time.text = "Posted: ${timestamp?.toDate()?.toString() ?: "Unknown Time"}"
 

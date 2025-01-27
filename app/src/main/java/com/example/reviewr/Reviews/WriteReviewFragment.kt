@@ -48,6 +48,8 @@ class WriteReviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
         // Initialize ViewModel
         reviewViewModel = ViewModelProvider(requireActivity())[ReviewViewModel::class.java]
 
@@ -141,6 +143,16 @@ class WriteReviewFragment : Fragment() {
             }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Reset image and variables
+        reviewImageUrl = null
+        binding.reviewImageView.visibility = View.GONE
+        binding.reviewImageView.setImageDrawable(null) // Clear any leftover image
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
