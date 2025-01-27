@@ -41,6 +41,10 @@ class ReviewViewModel : ViewModel() {
     private val _comments = MutableLiveData<List<Map<String, Any>>>()
     val comments: LiveData<List<Map<String, Any>>> get() = _comments
 
+    // LiveData to hold the username
+    private val _reviewAuthor = MutableLiveData<String>()
+    val reviewAuthor: LiveData<String> get() = _reviewAuthor
+
     // Filtered Reviews from search button
     private val _filteredReviews = MutableLiveData<List<Map<String, Any>>>()
     val filteredReviews: LiveData<List<Map<String, Any>>> get() = _filteredReviews
@@ -184,9 +188,35 @@ class ReviewViewModel : ViewModel() {
                     return@addSnapshotListener
                 }
                 if (document != null && document.exists()) {
-                    _selectedReview.value = document.data
+                    val reviewData = document.data
+                    if (reviewData != null) {
+                        _selectedReview.value = reviewData
+
+                        // Set up live username updates
+                        val userId = reviewData["userId"] as? String
+                        if (userId != null) {
+                            firestore.collection("users").document(userId)
+                                .addSnapshotListener { userDoc, userError ->
+                                    if (userError != null) {
+                                        Log.e("ReviewViewModel", "Error fetching user", userError)
+                                        _reviewAuthor.value = "Unknown"
+                                        return@addSnapshotListener
+                                    }
+
+                                    if (userDoc != null && userDoc.exists()) {
+                                        val username = userDoc.getString("username") ?: "Anonymous"
+                                        _reviewAuthor.value = username
+                                    } else {
+                                        _reviewAuthor.value = "Unknown"
+                                    }
+                                }
+                        } else {
+                            _reviewAuthor.value = "Unknown"
+                        }
+                    }
                 } else {
                     _selectedReview.value = null
+                    _reviewAuthor.value = "Unknown"
                 }
             }
     }
