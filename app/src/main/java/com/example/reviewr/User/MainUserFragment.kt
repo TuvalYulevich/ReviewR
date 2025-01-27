@@ -94,70 +94,23 @@ class MainUserFragment : Fragment() {
                     val within500Meters = stringFilters["within500Meters"]?.toBoolean() ?: false
                     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
 
-                    when (stringFilters["action"]) {
-                        "showAll" -> {
-                            if (within500Meters) {
-                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                                    if (location != null) {
-                                        reviewViewModel.applyFilters2(stringFilters, location) // Pass Map<String, String>
-                                        reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
-                                            if (reviews.isNotEmpty()) {
-                                                findNavController().navigate(
-                                                    MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
-                                                )
-                                            } else {
-                                                Toast.makeText(
-                                                    requireContext(),
-                                                    "No reviews found within 500 meters.",
-                                                    Toast.LENGTH_SHORT
-                                                ).show()
-                                            }
-                                        }
-                                    } else {
-                                        Toast.makeText(requireContext(), "Unable to retrieve location.", Toast.LENGTH_SHORT).show()
-                                    }
-                                }.addOnFailureListener {
-                                    Toast.makeText(requireContext(), "Failed to retrieve location.", Toast.LENGTH_SHORT).show()
-                                }
+                    if (within500Meters) {
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                            if (location != null) {
+                                reviewViewModel.fetchFilteredReviews(stringFilters, location)
                             } else {
-                                reviewViewModel.fetchAllReviews()
-                                reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
-                                    if (reviews.isNotEmpty()) {
-                                        findNavController().navigate(
-                                            MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
-                                        )
-                                    } else {
-                                        Toast.makeText(requireContext(), "No reviews found.", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
+                                Toast.makeText(requireContext(), "Unable to retrieve location.", Toast.LENGTH_SHORT).show()
                             }
+                        }.addOnFailureListener {
+                            Toast.makeText(requireContext(), "Failed to retrieve location.", Toast.LENGTH_SHORT).show()
                         }
-
-                        "applyFilters" -> {
-                            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                                if (location != null) {
-                                    reviewViewModel.applyFilters2(stringFilters, location) // Pass Map<String, String>
-                                    reviewViewModel.filteredReviews.observe(viewLifecycleOwner) { reviews ->
-                                        if (reviews.isNotEmpty()) {
-                                            findNavController().navigate(
-                                                MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
-                                            )
-                                        } else {
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "No matching reviews found.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                    }
-                                } else {
-                                    Toast.makeText(requireContext(), "Unable to retrieve location.", Toast.LENGTH_SHORT).show()
-                                }
-                            }.addOnFailureListener {
-                                Toast.makeText(requireContext(), "Failed to retrieve location.", Toast.LENGTH_SHORT).show()
-                            }
-                        }
+                    } else {
+                        reviewViewModel.fetchFilteredReviews(stringFilters)
                     }
+
+                    findNavController().navigate(
+                        MainUserFragmentDirections.actionMainUserFragmentToSearchResultsFragment()
+                    )
                 }
                 dialog.show(parentFragmentManager, "SearchDialog")
             } else {

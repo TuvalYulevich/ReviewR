@@ -31,7 +31,11 @@ class ViewReviewFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         binding = ViewReviewFragmentBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -53,6 +57,11 @@ class ViewReviewFragment : Fragment() {
         // Observe the LiveData for the specific review
         reviewViewModel.selectedReview.observe(viewLifecycleOwner) { review ->
             displayReviewDetails(review)
+        }
+
+        // Add observer for username LiveData
+        reviewViewModel.reviewAuthor.observe(viewLifecycleOwner) { username ->
+            binding.reviewAuthor.text = "Posted by: $username"
         }
 
         // Fetch the review details using the ViewModel
@@ -85,10 +94,10 @@ class ViewReviewFragment : Fragment() {
             binding.reviewCategory.text = "Category: ${review["category"] as? String ?: "Unknown"}"
 
             // Load the profile picture using Glide
-            val imageUrl  = review["imageUrl"] as? String
-            if (!imageUrl .isNullOrEmpty()) {
+            val imageUrl = review["imageUrl"] as? String
+            if (!imageUrl.isNullOrEmpty()) {
                 Glide.with(requireContext())
-                    .load(imageUrl ) // Load the review image URL
+                    .load(imageUrl) // Load the review image URL
                     .placeholder(R.drawable.ic_launcher_foreground) // Default image while loading
                     .into(binding.reviewImageView) // Target ImageView
             } else {
@@ -138,15 +147,27 @@ class ViewReviewFragment : Fragment() {
                     // Post the comment using ReviewViewModel
                     reviewViewModel.postComment(postId!!, comment) { success ->
                         if (success) {
-                            Toast.makeText(requireContext(), "Comment posted successfully!", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Comment posted successfully!",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             dialog.dismiss()
                         } else {
-                            Toast.makeText(requireContext(), "Failed to post comment.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to post comment.",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
             } else {
-                Toast.makeText(requireContext(), "Title and description are required.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Title and description are required.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
         popupBinding.goBackCommentButton.setOnClickListener {
