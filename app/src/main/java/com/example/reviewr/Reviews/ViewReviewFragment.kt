@@ -141,7 +141,6 @@ class ViewReviewFragment : Fragment() {
                         "userId" to currentUserId,
                         "title" to title,
                         "description" to description,
-                        "username" to username, // Use the fetched username
                         "timestamp" to com.google.firebase.Timestamp.now()
                     )
                     // Post the comment using ReviewViewModel
@@ -183,9 +182,15 @@ class ViewReviewFragment : Fragment() {
         } else {
             binding.commentsRecyclerView.visibility = View.VISIBLE
             binding.noCommentsText.visibility = View.GONE
-            val adapter = CommentAdapter(comments.toMutableList())
+            val adapter = CommentAdapter(
+                comments.toMutableList(),
+                onEditClicked = null,
+                onDeleteClicked = null,
+                onCommentClicked = null,
+                reviewViewModel = reviewViewModel  // Pass the ReviewViewModel
+            )
             binding.commentsRecyclerView.adapter = adapter
-            adapter.notifyDataSetChanged() // Ensure the RecyclerView refreshes
+            adapter.notifyDataSetChanged()
         }
     }
 }
