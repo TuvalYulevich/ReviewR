@@ -125,41 +125,43 @@ class ReviewViewModel : ViewModel() {
 
     // Fetch reviews
     fun fetchFilteredReviews(filters: Map<String, String>? = null, userLocation: Location? = null) {
-        firestore.collection("posts").addSnapshotListener { snapshots, e ->
-            if (e != null) {
-                Log.e("ReviewViewModel", "Error fetching reviews: $e")
-                _filteredReviews.postValue(emptyList())
-                return@addSnapshotListener
+        val collectionRef = firestore.collection("posts")
+
+        // Only apply status filter if it's not "ALL"
+        var query: Query = collectionRef  // Initialize as Query type
+
+        filters?.get("status")?.let { status ->
+            if (status != "All") {
+                query = collectionRef.whereEqualTo("status", status)
+            }
+        }
+
+        filters?.get("category")?.let { category ->
+            if (category != "All") {
+                query = query.whereEqualTo("category", category)
+            }
+        }
+
+        query.get().addOnSuccessListener { snapshots ->
+            val reviews = snapshots.documents.mapNotNull { it.data }
+
+            val finalReviews = if (userLocation != null && filters?.get("within500Meters")?.toBoolean() == true) {
+                reviews.filter { review ->
+                    val location = review["location"] as? Map<String, Double> ?: return@filter false
+                    val reviewLocation = Location("").apply {
+                        latitude = location["latitude"] ?: return@filter false
+                        longitude = location["longitude"] ?: return@filter false
+                    }
+                    reviewLocation.distanceTo(userLocation) <= 500
+                }
+            } else {
+                reviews
             }
 
-            val reviews = snapshots?.documents?.mapNotNull { document ->
-                val data = document.data ?: return@mapNotNull null
-
-                // Apply filters if provided
-                val matchesFilters = filters?.let { filterMap ->
-                    val matchesStatus = filterMap["status"]?.let { data["status"] == it } ?: true
-                    val matchesCategory = filterMap["category"]?.let { data["category"] == it } ?: true
-                    val withinDistance = filterMap["within500Meters"]?.toBoolean()?.let { within500 ->
-                        if (within500) {
-                            val location = data["location"] as? Map<String, Double>
-                            location?.let {
-                                val distance = calculateDistance(
-                                    userLocation!!.latitude,
-                                    userLocation.longitude,
-                                    it["latitude"] ?: 0.0,
-                                    it["longitude"] ?: 0.0
-                                )
-                                distance <= 500
-                            } ?: false
-                        } else true
-                    } ?: true
-                    matchesStatus && matchesCategory && withinDistance
-                } ?: true // No filters, show all reviews
-
-                if (matchesFilters) data else null
-            } ?: emptyList()
-
-            _filteredReviews.postValue(reviews)
+            _filteredReviews.postValue(finalReviews)
+        }.addOnFailureListener { exception ->
+            Log.e("ReviewViewModel", "Error fetching reviews: $exception")
+            _filteredReviews.postValue(emptyList())
         }
     }
 
