@@ -41,7 +41,7 @@ Guided by: Mr. Yehuda Rozaliyo.
 
 This project is a part of the Cellular Apps Development course in our BCS Computer Science studies.
 
-![image](https://github.com/user-attachments/assets/87c3ad4b-0580-4dac-9e21-c39c7637d82c)
+![image](https://github.com/user-attachments/assets/e05901a5-6848-44db-a957-d4b0ab8bb8b4) ![image](https://github.com/user-attachments/assets/99e8d08e-e418-4f33-aed3-33833f4be171) ![image](https://github.com/user-attachments/assets/87c3ad4b-0580-4dac-9e21-c39c7637d82c)
 
 
 
