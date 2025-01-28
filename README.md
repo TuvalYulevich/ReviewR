@@ -36,10 +36,12 @@ Functional Details –
 15. Offline possibilities.
 16. Firebase API and Cloudinary API synchronized interaction of posting \ getting \ adding \ deleting.
 
+Made by: Tuval Yulevich, Shlomi Barsheshet, Guy Halfon.
+Guided by: Mr. Yehuda Rozaliyo.
 
+This project is a part of the Cellular Apps Development course in our BCS Computer Science studies.
 
-![image](https://github.com/user-attachments/assets/e47f2e4d-e14c-41bf-a724-9f99243296d6) ![image](https://github.com/user-attachments/assets/d61e16e6-3499-4ec8-b043-2c801685b96e) 
-![image](https://github.com/user-attachments/assets/896c12f3-1027-4ab9-b754-1bd42e0fdb62) ![image](https://github.com/user-attachments/assets/5edd4579-d0c4-4290-9159-86e5b5c15f51)
+![image](https://github.com/user-attachments/assets/87c3ad4b-0580-4dac-9e21-c39c7637d82c)
 
 
 
